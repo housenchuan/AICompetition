@@ -1,0 +1,33 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/aicompetition
+    username: housenchuan
+    password:
+    driver-class-name: org.postgresql.Driver
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.aicompetition.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+pagehelper:
+  helper-dialect: postgresql
+  reasonable: true
+  support-methods-arguments: true
+
+# 爱码 Chat API
+ai:
+  aicoder:
+    api-key: 0cbfa790ff4d0a12a32c55d1f4d976a7a11892821c5a2acfeb66695bfd8b90cd5edbd3c719381bb330d1df349fcacc
+    base-url: http://wizard-ai.paic.com.cn/code_pilot/api/v1
+    model: aicoder-coder-qwen3-30b
+    default-temperature: 0.7
+    default-max-tokens: 4096
+
+logging:
+  level:
+    com.aicompetition: debug
