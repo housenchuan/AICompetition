@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicompetition.mapper.UnderwritingDecisionMapper">
+
+    <sql id="Base_Columns">
+        decision_id, application_id, customer_id, age, gender, occupation,
+        annual_income, has_social_insurance, smoking_status, drinking_status,
+        family_medical_history, personal_medical_history, bmi, blood_pressure,
+        risk_score, risk_level, underwriting_result, premium_adjustment,
+        key_factors, created_by, created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.aicompetition.entity.UnderwritingDecision">
+        INSERT INTO underwriting_decisions (
+            decision_id, application_id, customer_id, age, gender, occupation,
+            annual_income, has_social_insurance, smoking_status, drinking_status,
+            family_medical_history, personal_medical_history, bmi, blood_pressure,
+            risk_score, risk_level, underwriting_result, premium_adjustment,
+            key_factors, created_by, created_at, updated_at
+        ) VALUES (
+            #{decisionId}, #{applicationId}, #{customerId}, #{age}, #{gender}, #{occupation},
+            #{annualIncome}, #{hasSocialInsurance}, #{smokingStatus}, #{drinkingStatus},
+            #{familyMedicalHistory}, #{personalMedicalHistory}, #{bmi}, #{bloodPressure},
+            #{riskScore}, #{riskLevel}, #{underwritingResult}, #{premiumAdjustment},
+            #{keyFactors}, #{createdBy}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.aicompetition.entity.UnderwritingDecision">
+        UPDATE underwriting_decisions
+        <set>
+            <if test="applicationId != null">application_id = #{applicationId},</if>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="occupation != null">occupation = #{occupation},</if>
+            <if test="annualIncome != null">annual_income = #{annualIncome},</if>
+            <if test="hasSocialInsurance != null">has_social_insurance = #{hasSocialInsurance},</if>
+            <if test="smokingStatus != null">smoking_status = #{smokingStatus},</if>
+            <if test="drinkingStatus != null">drinking_status = #{drinkingStatus},</if>
+            <if test="familyMedicalHistory != null">family_medical_history = #{familyMedicalHistory},</if>
+            <if test="personalMedicalHistory != null">personal_medical_history = #{personalMedicalHistory},</if>
+            <if test="bmi != null">bmi = #{bmi},</if>
+            <if test="bloodPressure != null">blood_pressure = #{bloodPressure},</if>
+            <if test="riskScore != null">risk_score = #{riskScore},</if>
+            <if test="riskLevel != null">risk_level = #{riskLevel},</if>
+            <if test="underwritingResult != null">underwriting_result = #{underwritingResult},</if>
+            <if test="premiumAdjustment != null">premium_adjustment = #{premiumAdjustment},</if>
+            <if test="keyFactors != null">key_factors = #{keyFactors},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE decision_id = #{decisionId}
+    </update>
+
+    <update id="updatePrediction" parameterType="com.aicompetition.entity.UnderwritingDecision">
+        UPDATE underwriting_decisions
+        SET risk_score         = #{riskScore},
+            risk_level         = #{riskLevel},
+            underwriting_result = #{underwritingResult},
+            premium_adjustment = #{premiumAdjustment},
+            key_factors        = #{keyFactors},
+            updated_at         = #{updatedAt}
+        WHERE decision_id = #{decisionId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM underwriting_decisions WHERE decision_id = #{decisionId}
+    </delete>
+
+    <select id="selectById" resultType="com.aicompetition.entity.UnderwritingDecision">
+        SELECT <include refid="Base_Columns"/>
+        FROM underwriting_decisions
+        WHERE decision_id = #{decisionId}
+    </select>
+
+    <select id="selectByApplicationId" resultType="com.aicompetition.entity.UnderwritingDecision">
+        SELECT <include refid="Base_Columns"/>
+        FROM underwriting_decisions
+        WHERE application_id = #{applicationId}
+    </select>
+
+    <select id="selectList" resultType="com.aicompetition.entity.UnderwritingDecision">
+        SELECT <include refid="Base_Columns"/>
+        FROM underwriting_decisions
+        <where>
+            <if test="q != null">
+                <if test="q.applicationId != null and q.applicationId != ''">AND application_id = #{q.applicationId}</if>
+                <if test="q.customerId != null and q.customerId != ''">AND customer_id = #{q.customerId}</if>
+                <if test="q.gender != null and q.gender != ''">AND gender = #{q.gender}</if>
+                <if test="q.occupation != null and q.occupation != ''">AND occupation = #{q.occupation}</if>
+                <if test="q.riskLevel != null and q.riskLevel != ''">AND risk_level = #{q.riskLevel}</if>
+                <if test="q.underwritingResult != null and q.underwritingResult != ''">AND underwriting_result = #{q.underwritingResult}</if>
+            </if>
+        </where>
+        ORDER BY created_at DESC NULLS LAST, decision_id
+    </select>
+</mapper>

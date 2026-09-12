@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="526" viewBox="0 0 680 526" font-family="'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="8" refX="7.5" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L8,3 L0,6" fill="none" stroke="#5F5E5A" stroke-width="1.3"/>
+    </marker>
+  </defs>
+  <style>
+    .th{font-size:14px;font-weight:500;fill:#2C2C2A}
+    .ts{font-size:12px;fill:#5F5E5A}
+    .lbl{font-size:13px;font-weight:500}
+    .arr{fill:none;stroke:#5F5E5A;stroke-width:1.5;marker-end:url(#ah)}
+    .arrd{fill:none;stroke:#888780;stroke-width:1.5;stroke-dasharray:5 4;marker-end:url(#ah)}
+    .box{fill:#FFFFFF;stroke:#B4B2A9;stroke-width:1}
+  </style>
+
+  <rect x="40" y="48" width="600" height="92" rx="10" fill="#E6F1FB" stroke="#185FA5"/>
+  <text class="lbl" x="52" y="70" fill="#0C447C">1　交互层　Web / UI</text>
+  <rect x="40" y="164" width="520" height="84" rx="10" fill="#FAEEDA" stroke="#854F0B"/>
+  <text class="lbl" x="52" y="184" fill="#633806">2　编排层　Orchestrator</text>
+  <rect x="40" y="272" width="600" height="94" rx="10" fill="#E1F5EE" stroke="#0F6E56"/>
+  <text class="lbl" x="52" y="292" fill="#085041">3　服务层</text>
+  <rect x="40" y="390" width="600" height="96" rx="10" fill="#EEEDFE" stroke="#534AB7"/>
+  <text class="lbl" x="52" y="410" fill="#3C3489">4　基础设施层</text>
+
+  <rect class="box" x="70" y="82" width="210" height="46" rx="8"/>
+  <text class="th" x="175" y="104" text-anchor="middle">前端 Web UI</text>
+  <text class="ts" x="175" y="120" text-anchor="middle">Vue 3 + Element Plus</text>
+  <rect class="box" x="400" y="82" width="210" height="46" rx="8"/>
+  <text class="th" x="505" y="104" text-anchor="middle">接口层</text>
+  <text class="ts" x="505" y="120" text-anchor="middle">Spring Boot Controller</text>
+  <line class="arr" x1="280" y1="105" x2="398" y2="105"/>
+  <text class="ts" x="339" y="99" text-anchor="middle">HTTP / REST</text>
+
+  <rect class="box" x="180" y="188" width="260" height="48" rx="8"/>
+  <text class="th" x="310" y="210" text-anchor="middle">意图编排 Agent</text>
+  <text class="ts" x="310" y="227" text-anchor="middle">意图识别 · 参数抽取 · 分发</text>
+  <line class="arr" x1="505" y1="128" x2="405" y2="188"/>
+  <text class="ts" x="452" y="152" text-anchor="middle">自然语言指令</text>
+
+  <polyline class="arr" points="570,128 600,152 600,270"/>
+  <text class="ts" x="568" y="150" text-anchor="end">常规请求</text>
+
+  <rect class="box" x="58" y="298" width="176" height="56" rx="8"/>
+  <text class="th" x="146" y="322" text-anchor="middle">数据服务</text>
+  <text class="ts" x="146" y="340" text-anchor="middle">增删改查 · MyBatis</text>
+  <rect class="box" x="252" y="298" width="176" height="56" rx="8"/>
+  <text class="th" x="340" y="322" text-anchor="middle">核保专家 Agent</text>
+  <text class="ts" x="340" y="340" text-anchor="middle">规则引擎 + LLM 语义</text>
+  <rect class="box" x="446" y="298" width="176" height="56" rx="8"/>
+  <text class="th" x="534" y="322" text-anchor="middle">报表服务</text>
+  <text class="ts" x="534" y="340" text-anchor="middle">数据汇总与制表</text>
+
+  <line class="arr" x1="250" y1="236" x2="152" y2="296"/>
+  <text class="ts" x="196" y="264" text-anchor="middle">查询 / 更新</text>
+  <line class="arr" x1="330" y1="236" x2="340" y2="296"/>
+  <text class="ts" x="352" y="264" text-anchor="start">预测</text>
+  <line class="arr" x1="400" y1="236" x2="528" y2="296"/>
+  <text class="ts" x="470" y="264" text-anchor="middle">统计</text>
+
+  <rect class="box" x="58" y="416" width="176" height="58" rx="8"/>
+  <text class="th" x="146" y="440" text-anchor="middle">规则知识库 / 配置</text>
+  <text class="ts" x="146" y="458" text-anchor="middle">存规则 · 仅供展示</text>
+  <rect class="box" x="252" y="416" width="176" height="58" rx="8"/>
+  <text class="th" x="340" y="440" text-anchor="middle">PostgreSQL</text>
+  <text class="ts" x="340" y="458" text-anchor="middle">核保业务库 · 三张表</text>
+  <rect class="box" x="446" y="416" width="176" height="58" rx="8"/>
+  <text class="th" x="534" y="440" text-anchor="middle">爱码 LLM API</text>
+  <text class="ts" x="534" y="458" text-anchor="middle">aicoder-qwen3-30b</text>
+
+  <line class="arr" x1="180" y1="354" x2="300" y2="414"/>
+  <text class="ts" x="188" y="374" text-anchor="middle">读写</text>
+  <line class="arr" x1="500" y1="354" x2="380" y2="414"/>
+  <line class="arrd" x1="300" y1="354" x2="180" y2="414"/>
+  <text class="ts" x="112" y="408" text-anchor="start">规则·展示</text>
+  <line class="arr" x1="380" y1="354" x2="500" y2="414"/>
+  <text class="ts" x="512" y="374" text-anchor="middle">调用推理</text>
+</svg>

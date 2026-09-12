@@ -1,0 +1,62 @@
+{
+  "version": "V1",
+  "versionNote": "BMI/血压/烟酒/个人病史/年龄 为赛题给定固定规则；职业风险、家族病史、风险等级区间为 V2 待历史理赔数据挖掘校准的部分（当前为暂定占位）。",
+  "bmi": [
+    { "min": 0,    "max": 18.5,  "label": "体重过轻", "score": 10 },
+    { "min": 18.5, "max": 25.0,  "label": "正常范围", "score": 0 },
+    { "min": 25.0, "max": 28.1,  "label": "超重",     "score": 5 },
+    { "min": 28.1, "max": 32.1,  "label": "肥胖",     "score": 15 },
+    { "min": 32.1, "max": 999,   "label": "严重肥胖", "score": 30 }
+  ],
+  "bloodPressure": [
+    { "label": "正常血压",   "systolicMax": 119, "diastolicMax": 79,  "score": 0 },
+    { "label": "血压偏高",   "systolicMax": 139, "diastolicMax": 89,  "score": 5 },
+    { "label": "1级高血压", "systolicMax": 159, "diastolicMax": 99,  "score": 15 },
+    { "label": "2级高血压", "systolicMax": 999, "diastolicMax": 999, "score": 30 }
+  ],
+  "smoking": [
+    { "status": "不吸烟", "keywords": ["不吸烟", "否", "无"],   "score": 0 },
+    { "status": "已戒烟", "keywords": ["已戒烟", "戒烟"],        "score": 5 },
+    { "status": "吸烟",   "keywords": ["吸烟", "抽烟", "是"],    "score": 15 }
+  ],
+  "drinking": [
+    { "status": "不饮酒/偶尔饮酒", "keywords": ["不饮酒", "偶尔", "否", "无"], "score": 0 },
+    { "status": "经常饮酒",        "keywords": ["经常", "每日", "是"],         "score": 20 }
+  ],
+  "personalHistory": [
+    { "category": "轻度异常", "score": 10, "reject": false, "diseases": ["轻度脂肪肝", "轻度胃炎", "甲状腺结节", "胆结石", "乙肝病毒携带"] },
+    { "category": "轻度异常", "score": 5,  "reject": false, "diseases": ["颈椎病", "腰椎间盘突出"] },
+    { "category": "中度异常", "score": 30, "reject": false, "diseases": ["2型糖尿病", "糖尿病"] },
+    { "category": "中度异常", "score": 25, "reject": false, "diseases": ["高血压", "高血脂"] },
+    { "category": "中度异常", "score": 45, "reject": false, "diseases": ["冠心病"] },
+    { "category": "重度异常（直接拒保）", "score": 0, "reject": true, "diseases": ["恶性肿瘤", "癌症", "心衰", "肾衰", "肝硬化", "严重精神疾病", "AIDS", "HIV"] }
+  ],
+  "age": [
+    { "min": 0,  "max": 18,  "label": "未成年人", "score": 0 },
+    { "min": 18, "max": 41,  "label": "青壮年",   "score": 0 },
+    { "min": 41, "max": 51,  "label": "中年",     "score": 10 },
+    { "min": 51, "max": 61,  "label": "中老年",   "score": 20 },
+    { "min": 61, "max": 200, "label": "老年",     "score": 40 }
+  ],
+  "occupation": [
+    { "level": "低风险", "score": 0,  "occupations": ["办公室职员", "教师", "警察", "行政管理人员", "公务人员"] },
+    { "level": "中风险", "score": 5,  "occupations": ["快递员", "厨师", "电力维修工", "个体从业者", "企业家"] },
+    { "level": "高风险", "score": 15, "occupations": ["矿工", "消防员", "司机", "建筑工人"] }
+  ],
+  "occupationNote": "V1 分类，需按历史理赔数据重新划分并给出各等级职业清单（对应评分点 2.1.1）。",
+  "familyHistory": [
+    { "level": "低风险", "score": 0,  "diseases": [] },
+    { "level": "中风险", "score": 5,  "diseases": [] },
+    { "level": "高风险", "score": 15, "diseases": [] }
+  ],
+  "familyHistoryNote": "家族病史类型划分待历史数据挖掘填充（对应评分点 2.1.2）。",
+  "levels": [
+    { "level": "标准体",     "result": "标保（标准费率承保）",        "minScore": 0,  "maxScore": 30,  "claimProb": "< 47.5%",        "premiumAdjustment": 1.0 },
+    { "level": "次标体A级",  "result": "加费承保（加费10%~20%）",      "minScore": 31, "maxScore": 50,  "claimProb": "[47.5%, 67.5%)", "premiumAdjustment": 1.15 },
+    { "level": "次标体B级",  "result": "加费承保（加费20%~50%）或除外", "minScore": 51, "maxScore": 75,  "claimProb": "[67.5%, 82.5%)", "premiumAdjustment": 1.35 },
+    { "level": "高风险体",   "result": "延期承保并加费50%以上",         "minScore": 76, "maxScore": 999, "claimProb": ">= 82.5%",       "premiumAdjustment": 1.6 },
+    { "level": "拒保体",     "result": "拒保",                          "minScore": -1, "maxScore": -1,  "claimProb": "-",              "premiumAdjustment": 1.0 }
+  ],
+  "levelsNote": "分数区间为 V1 暂定值，需结合历史理赔概率分位（47.5% / 67.5% / 82.5%）用样本数据校准（对应评分点 2.1.3）。",
+  "rejectDiseases": ["恶性肿瘤", "癌症", "心衰", "肾衰", "肝硬化", "严重精神疾病", "AIDS", "HIV", "药物成瘾", "酒精成瘾"]
+}

@@ -15,6 +15,10 @@ frontend/.vite/
 .vscode/
 *.iml
 
+# macOS
+.DS_Store
+**/.DS_Store
+
 # Environment
 .env
 .env.local

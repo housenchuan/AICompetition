@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  # 本地覆盖（DeepSeek 测试等），文件已 gitignore；不存在则忽略
+  config:
+    import: "optional:classpath:application-local.yml"
   datasource:
     url: jdbc:postgresql://localhost:5432/aicompetition
     username: housenchuan
@@ -27,6 +30,12 @@ ai:
     model: aicoder-coder-qwen3-30b
     default-temperature: 0.7
     default-max-tokens: 4096
+  # 预测时是否用 LLM 增强关键因子文本（内网爱码可达默认开；调用失败自动降级纯规则引擎）
+  predict:
+    use-llm: true
+  # 自然语言解析是否用 LLM（内网爱码可达默认开；调用失败自动降级本地规则解析）
+  nl:
+    use-llm: true
 
 logging:
   level:

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicompetition.mapper.CustomerRiskHisMapper">
+
+    <sql id="Base_Columns">
+        profile_id, customer_id, age, gender, occupation, annual_income,
+        has_social_insurance, smoking_status, drinking_status,
+        family_medical_history, personal_medical_history, bmi, blood_pressure,
+        created_at, updated_at, target, score_v1
+    </sql>
+
+    <insert id="insert" parameterType="com.aicompetition.entity.CustomerRiskHis">
+        INSERT INTO customer_risk_his (
+            profile_id, customer_id, age, gender, occupation, annual_income,
+            has_social_insurance, smoking_status, drinking_status,
+            family_medical_history, personal_medical_history, bmi, blood_pressure,
+            created_at, updated_at, target, score_v1
+        ) VALUES (
+            #{profileId}, #{customerId}, #{age}, #{gender}, #{occupation}, #{annualIncome},
+            #{hasSocialInsurance}, #{smokingStatus}, #{drinkingStatus},
+            #{familyMedicalHistory}, #{personalMedicalHistory}, #{bmi}, #{bloodPressure},
+            #{createdAt}, #{updatedAt}, #{target}, #{scoreV1}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.aicompetition.entity.CustomerRiskHis">
+        UPDATE customer_risk_his
+        <set>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="occupation != null">occupation = #{occupation},</if>
+            <if test="annualIncome != null">annual_income = #{annualIncome},</if>
+            <if test="hasSocialInsurance != null">has_social_insurance = #{hasSocialInsurance},</if>
+            <if test="smokingStatus != null">smoking_status = #{smokingStatus},</if>
+            <if test="drinkingStatus != null">drinking_status = #{drinkingStatus},</if>
+            <if test="familyMedicalHistory != null">family_medical_history = #{familyMedicalHistory},</if>
+            <if test="personalMedicalHistory != null">personal_medical_history = #{personalMedicalHistory},</if>
+            <if test="bmi != null">bmi = #{bmi},</if>
+            <if test="bloodPressure != null">blood_pressure = #{bloodPressure},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+            <if test="target != null">target = #{target},</if>
+            <if test="scoreV1 != null">score_v1 = #{scoreV1},</if>
+        </set>
+        WHERE profile_id = #{profileId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM customer_risk_his WHERE profile_id = #{profileId}
+    </delete>
+
+    <select id="selectById" resultType="com.aicompetition.entity.CustomerRiskHis">
+        SELECT <include refid="Base_Columns"/>
+        FROM customer_risk_his
+        WHERE profile_id = #{profileId}
+    </select>
+
+    <select id="selectList" resultType="com.aicompetition.entity.CustomerRiskHis">
+        SELECT <include refid="Base_Columns"/>
+        FROM customer_risk_his
+        <where>
+            <if test="q != null">
+                <if test="q.customerId != null and q.customerId != ''">AND customer_id = #{q.customerId}</if>
+                <if test="q.gender != null and q.gender != ''">AND gender = #{q.gender}</if>
+                <if test="q.occupation != null and q.occupation != ''">AND occupation = #{q.occupation}</if>
+                <if test="q.smokingStatus != null and q.smokingStatus != ''">AND smoking_status = #{q.smokingStatus}</if>
+                <if test="q.drinkingStatus != null and q.drinkingStatus != ''">AND drinking_status = #{q.drinkingStatus}</if>
+                <if test="q.hasSocialInsurance != null">AND has_social_insurance = #{q.hasSocialInsurance}</if>
+                <if test="q.target != null">AND target = #{q.target}</if>
+            </if>
+            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
+            <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
+            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
+            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
+        </where>
+        ORDER BY created_at DESC NULLS LAST, profile_id
+    </select>
+</mapper>

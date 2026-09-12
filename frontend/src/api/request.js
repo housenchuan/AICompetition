@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
-  timeout: 10000
+  timeout: 60000
 })
 
 request.interceptors.request.use(
@@ -18,9 +18,16 @@ request.interceptors.request.use(
 )
 
 request.interceptors.response.use(
-  response => response.data,
+  response => {
+    const body = response.data
+    if (body && typeof body === 'object' && 'code' in body && body.code !== 0) {
+      ElMessage.error(body.message || '请求失败')
+      return Promise.reject(body)
+    }
+    return body
+  },
   error => {
-    ElMessage.error(error.response?.data?.message || '请求失败')
+    ElMessage.error(error.response?.data?.message || error.message || '请求失败')
     return Promise.reject(error)
   }
 )

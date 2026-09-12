@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aicompetition.mapper.PolicyApplicationMapper">
+
+    <sql id="Base_Columns">
+        application_id, customer_id, product_type, product_name, coverage_amount,
+        premium, payment_frequency, insurance_period, waiting_period,
+        beneficiary_relationship, application_date, status, created_by,
+        created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.aicompetition.entity.PolicyApplication">
+        INSERT INTO policy_applications (
+            application_id, customer_id, product_type, product_name, coverage_amount,
+            premium, payment_frequency, insurance_period, waiting_period,
+            beneficiary_relationship, application_date, status, created_by,
+            created_at, updated_at
+        ) VALUES (
+            #{applicationId}, #{customerId}, #{productType}, #{productName}, #{coverageAmount},
+            #{premium}, #{paymentFrequency}, #{insurancePeriod}, #{waitingPeriod},
+            #{beneficiaryRelationship}, #{applicationDate}, #{status}, #{createdBy},
+            #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.aicompetition.entity.PolicyApplication">
+        UPDATE policy_applications
+        <set>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="productType != null">product_type = #{productType},</if>
+            <if test="productName != null">product_name = #{productName},</if>
+            <if test="coverageAmount != null">coverage_amount = #{coverageAmount},</if>
+            <if test="premium != null">premium = #{premium},</if>
+            <if test="paymentFrequency != null">payment_frequency = #{paymentFrequency},</if>
+            <if test="insurancePeriod != null">insurance_period = #{insurancePeriod},</if>
+            <if test="waitingPeriod != null">waiting_period = #{waitingPeriod},</if>
+            <if test="beneficiaryRelationship != null">beneficiary_relationship = #{beneficiaryRelationship},</if>
+            <if test="applicationDate != null">application_date = #{applicationDate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createdBy != null">created_by = #{createdBy},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </set>
+        WHERE application_id = #{applicationId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM policy_applications WHERE application_id = #{applicationId}
+    </delete>
+
+    <select id="selectById" resultType="com.aicompetition.entity.PolicyApplication">
+        SELECT <include refid="Base_Columns"/>
+        FROM policy_applications
+        WHERE application_id = #{applicationId}
+    </select>
+
+    <select id="selectList" resultType="com.aicompetition.entity.PolicyApplication">
+        SELECT <include refid="Base_Columns"/>
+        FROM policy_applications
+        <where>
+            <if test="q != null">
+                <if test="q.customerId != null and q.customerId != ''">AND customer_id = #{q.customerId}</if>
+                <if test="q.productType != null and q.productType != ''">AND product_type = #{q.productType}</if>
+                <if test="q.productName != null and q.productName != ''">AND product_name = #{q.productName}</if>
+                <if test="q.paymentFrequency != null and q.paymentFrequency != ''">AND payment_frequency = #{q.paymentFrequency}</if>
+                <if test="q.status != null and q.status != ''">AND status = #{q.status}</if>
+                <if test="q.createdBy != null and q.createdBy != ''">AND created_by = #{q.createdBy}</if>
+            </if>
+            <if test="dateFrom != null">AND application_date &gt;= #{dateFrom}</if>
+            <if test="dateTo != null">AND application_date &lt;= #{dateTo}</if>
+        </where>
+        ORDER BY application_date DESC NULLS LAST, application_id
+    </select>
+</mapper>
