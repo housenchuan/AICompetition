@@ -114,6 +114,7 @@ function renderChart() {
       type: 'bar',
       data,
       barWidth: '42%',
+      barMaxWidth: 80,
       label: { show: true, position: 'top', color: '#1f2329', fontWeight: 600 }
     }]
   })

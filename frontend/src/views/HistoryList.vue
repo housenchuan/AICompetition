@@ -5,22 +5,22 @@
     <div class="filter-bar">
       <el-form :model="query" label-width="96px">
         <el-row :gutter="12">
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="画像唯一标识">
               <el-input v-model="query.profileId" placeholder="如 P001" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="投保人编号">
               <el-input v-model="query.customerId" placeholder="如 C001" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="职业类别">
               <el-input v-model="query.occupation" placeholder="如 司机" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="血压情况">
               <el-select v-model="bpCategory" placeholder="全部" clearable style="width: 100%">
                 <el-option label="正常血压（＜120/＜80）" value="正常血压" />
@@ -30,13 +30,13 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="创建时间">
               <el-date-picker v-model="createdRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="更新时间">
               <el-date-picker v-model="updatedRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
@@ -53,24 +53,24 @@
     <div class="page-card">
       <el-table ref="tableRef" :data="rows" v-loading="loading" border stripe size="small"
         max-height="calc(100vh - 320px)" scrollbar-always-on @filter-change="onFilter">
-        <el-table-column prop="profileId" label="画像唯一标识" width="120" />
-        <el-table-column prop="customerId" label="投保人编号" width="90" />
-        <el-table-column prop="age" label="年龄" width="60" />
-        <el-table-column prop="gender" label="性别" width="76" column-key="gender"
+        <el-table-column prop="profileId" label="画像唯一标识" min-width="120" />
+        <el-table-column prop="customerId" label="投保人编号" min-width="100" />
+        <el-table-column prop="age" label="年龄" min-width="70" />
+        <el-table-column prop="gender" label="性别" min-width="80" column-key="gender"
           :filters="genderFilters" :filter-multiple="false" />
-        <el-table-column prop="occupation" label="职业类别" width="110" show-overflow-tooltip />
-        <el-table-column prop="annualIncome" label="年收入(元)" width="110" />
-        <el-table-column label="社保" width="76" column-key="social"
+        <el-table-column prop="occupation" label="职业类别" min-width="110" show-overflow-tooltip />
+        <el-table-column prop="annualIncome" label="年收入(元)" min-width="110" />
+        <el-table-column label="社保" min-width="80" column-key="social"
           :filters="socialFilters" :filter-multiple="false">
           <template #default="{ row }">{{ row.hasSocialInsurance ? '是' : '否' }}</template>
         </el-table-column>
-        <el-table-column prop="smokingStatus" label="吸烟" width="88" column-key="smoking"
+        <el-table-column prop="smokingStatus" label="吸烟" min-width="90" column-key="smoking"
           :filters="smokingFilters" :filter-multiple="false" />
-        <el-table-column prop="drinkingStatus" label="饮酒" width="88" column-key="drinking"
+        <el-table-column prop="drinkingStatus" label="饮酒" min-width="90" column-key="drinking"
           :filters="drinkingFilters" :filter-multiple="false" />
-        <el-table-column prop="bmi" label="BMI" width="70" />
-        <el-table-column prop="bloodPressure" label="血压" width="90" />
-        <el-table-column label="是否理赔" width="100" column-key="target"
+        <el-table-column prop="bmi" label="BMI" min-width="80" />
+        <el-table-column prop="bloodPressure" label="血压" min-width="90" />
+        <el-table-column label="是否理赔" min-width="100" column-key="target"
           :filters="targetFilters" :filter-multiple="false">
           <template #default="{ row }">
             <el-tag :type="row.target === 1 ? 'danger' : 'success'" size="small">
@@ -78,9 +78,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="scoreV1" label="首版评分" width="80" />
-        <el-table-column prop="createdAt" label="创建时间" width="160" />
-        <el-table-column prop="updatedAt" label="更新时间" width="160" />
+        <el-table-column prop="scoreV1" label="首版评分" min-width="90" />
+        <el-table-column prop="createdAt" label="创建时间" min-width="160" />
+        <el-table-column prop="updatedAt" label="更新时间" min-width="160" />
         <el-table-column label="操作" width="80" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>

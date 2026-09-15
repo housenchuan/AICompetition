@@ -5,34 +5,34 @@
     <div class="filter-bar">
       <el-form :model="query" label-width="140px">
         <el-row :gutter="12">
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="投保申请人唯一标识">
               <el-input v-model="query.applicationId" placeholder="如 A001" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="投保人编号">
               <el-input v-model="query.customerId" placeholder="如 C001" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="创建人">
               <el-input v-model="query.createdBy" placeholder="如 人工" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="申请日期">
               <el-date-picker v-model="dateRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="创建时间">
               <el-date-picker v-model="createdRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="更新时间">
               <el-date-picker v-model="updatedRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
@@ -54,24 +54,24 @@
       <el-table ref="tableRef" :data="rows" v-loading="loading" border stripe size="small"
         max-height="calc(100vh - 330px)" scrollbar-always-on @filter-change="onFilter">
         <el-table-column prop="applicationId" label="投保申请人唯一标识" width="150" fixed="left" show-overflow-tooltip />
-        <el-table-column prop="customerId" label="投保人编号" width="90" />
-        <el-table-column prop="productType" label="产品类型" width="94" column-key="productType"
+        <el-table-column prop="customerId" label="投保人编号" min-width="100" />
+        <el-table-column prop="productType" label="产品类型" min-width="100" column-key="productType"
           :filters="productTypeFilters" :filter-multiple="false" />
-        <el-table-column prop="productName" label="产品名称" width="120" show-overflow-tooltip />
-        <el-table-column prop="coverageAmount" label="保额(元)" width="100" />
-        <el-table-column prop="premium" label="保费(元)" width="90" />
-        <el-table-column prop="paymentFrequency" label="缴费频率" width="80" />
-        <el-table-column prop="insurancePeriod" label="保障期限" width="88" />
-        <el-table-column label="申请状态" width="102" column-key="status"
+        <el-table-column prop="productName" label="产品名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="coverageAmount" label="保额(元)" min-width="110" />
+        <el-table-column prop="premium" label="保费(元)" min-width="100" />
+        <el-table-column prop="paymentFrequency" label="缴费频率" min-width="100" />
+        <el-table-column prop="insurancePeriod" label="保障期限" min-width="100" />
+        <el-table-column label="申请状态" min-width="110" column-key="status"
           :filters="statusFilters" :filter-multiple="false">
           <template #default="{ row }">
             <el-tag :type="statusType(row.status)" size="small">{{ row.status }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="applicationDate" label="申请日期" width="110" />
-        <el-table-column prop="createdBy" label="创建人" width="76" />
-        <el-table-column prop="createdAt" label="创建时间" width="160" />
-        <el-table-column prop="updatedAt" label="更新时间" width="160" />
+        <el-table-column prop="applicationDate" label="申请日期" min-width="120" />
+        <el-table-column prop="createdBy" label="创建人" min-width="90" />
+        <el-table-column prop="createdAt" label="创建时间" min-width="160" />
+        <el-table-column prop="updatedAt" label="更新时间" min-width="160" />
         <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>

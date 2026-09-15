@@ -19,14 +19,14 @@
     <div class="filter-bar">
       <el-form :model="form" label-width="86px">
         <el-row :gutter="12">
-          <el-col :span="6">
+          <el-col :xs="24" :sm="12" :md="6" :xl="5">
             <el-form-item label="数据源">
               <el-select v-model="form.entity" style="width:100%" @change="onEntityChange">
                 <el-option v-for="e in ENTITIES" :key="e.value" :label="e.label" :value="e.value" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="10">
+          <el-col :xs="24" :sm="12" :md="10" :xl="8">
             <el-form-item label="分组维度">
               <el-select v-model="form.groupBy" multiple :multiple-limit="4" collapse-tags collapse-tags-tooltip
                 placeholder="选择 1~4 个维度（单维出图+表，多维出交叉/组合表）" style="width:100%">
@@ -34,7 +34,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="创建时间">
               <el-date-picker v-model="dateRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width:100%" />

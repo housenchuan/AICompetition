@@ -5,33 +5,33 @@
     <div class="filter-bar">
       <el-form :model="query" label-width="118px">
         <el-row :gutter="12">
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="核保决策唯一标识">
               <el-input v-model="query.decisionId" placeholder="如 D001" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="投保申请编号">
               <el-input v-model="query.applicationId" placeholder="如 A001" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="投保人编号">
               <el-input v-model="query.customerId" placeholder="如 C001" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="创建人">
               <el-input v-model="query.createdBy" placeholder="如 人工/系统" clearable />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="创建时间">
               <el-date-picker v-model="createdRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="更新时间">
               <el-date-picker v-model="updatedRange" type="daterange" value-format="YYYY-MM-DD"
                 range-separator="至" start-placeholder="开始" end-placeholder="结束" style="width: 100%" />
@@ -56,40 +56,40 @@
         scrollbar-always-on @selection-change="onSelect" @filter-change="onFilter">
         <el-table-column type="selection" width="42" fixed="left" />
         <el-table-column prop="decisionId" label="核保决策唯一标识" width="140" fixed="left" show-overflow-tooltip />
-        <el-table-column prop="customerId" label="投保人编号" width="90" />
-        <el-table-column prop="applicationId" label="投保申请编号" width="100" show-overflow-tooltip />
-        <el-table-column prop="age" label="年龄" width="56" />
-        <el-table-column prop="gender" label="性别" width="72" column-key="gender"
+        <el-table-column prop="customerId" label="投保人编号" min-width="100" />
+        <el-table-column prop="applicationId" label="投保申请编号" min-width="110" show-overflow-tooltip />
+        <el-table-column prop="age" label="年龄" min-width="70" />
+        <el-table-column prop="gender" label="性别" min-width="80" column-key="gender"
           :filters="genderFilters" :filter-multiple="false" />
-        <el-table-column prop="occupation" label="职业类别" width="96" show-overflow-tooltip />
-        <el-table-column label="是否有社保" width="104" column-key="social"
+        <el-table-column prop="occupation" label="职业类别" min-width="100" show-overflow-tooltip />
+        <el-table-column label="是否有社保" min-width="110" column-key="social"
           :filters="socialFilters" :filter-multiple="false">
           <template #default="{ row }">{{ row.hasSocialInsurance ? '是' : '否' }}</template>
         </el-table-column>
-        <el-table-column prop="smokingStatus" label="吸烟状况" width="96" column-key="smoking"
+        <el-table-column prop="smokingStatus" label="吸烟状况" min-width="100" column-key="smoking"
           :filters="smokingFilters" :filter-multiple="false" />
-        <el-table-column prop="drinkingStatus" label="饮酒状况" width="96" column-key="drinking"
+        <el-table-column prop="drinkingStatus" label="饮酒状况" min-width="100" column-key="drinking"
           :filters="drinkingFilters" :filter-multiple="false" />
-        <el-table-column label="风险评分" width="76">
+        <el-table-column label="风险评分" min-width="90">
           <template #default="{ row }">
             <span v-if="row.riskScore != null" class="score">{{ row.riskScore }}</span>
             <span v-else class="muted">待预测</span>
           </template>
         </el-table-column>
-        <el-table-column label="风险等级" width="108" column-key="riskLevel"
+        <el-table-column label="风险等级" min-width="110" column-key="riskLevel"
           :filters="riskLevelFilters" :filter-multiple="false">
           <template #default="{ row }">
             <el-tag v-if="row.riskLevel" :type="riskType(row.riskLevel)" size="small">{{ row.riskLevel }}</el-tag>
             <span v-else class="muted">待预测</span>
           </template>
         </el-table-column>
-        <el-table-column prop="underwritingResult" label="核保结论" width="110" show-overflow-tooltip>
+        <el-table-column prop="underwritingResult" label="核保结论" min-width="110" show-overflow-tooltip>
           <template #default="{ row }">
             <span v-if="row.underwritingResult">{{ row.underwritingResult }}</span>
             <span v-else class="muted">待预测</span>
           </template>
         </el-table-column>
-        <el-table-column label="加费比例" width="72">
+        <el-table-column label="加费比例" min-width="90">
           <template #default="{ row }">
             <span v-if="row.premiumAdjustment != null">{{ row.premiumAdjustment }}</span>
             <span v-else class="muted">—</span>
@@ -101,9 +101,9 @@
             <span v-else class="muted">待预测</span>
           </template>
         </el-table-column>
-        <el-table-column prop="createdBy" label="创建人" width="76" />
-        <el-table-column prop="createdAt" label="创建时间" width="160" />
-        <el-table-column prop="updatedAt" label="更新时间" width="160" />
+        <el-table-column prop="createdBy" label="创建人" min-width="90" />
+        <el-table-column prop="createdAt" label="创建时间" min-width="160" />
+        <el-table-column prop="updatedAt" label="更新时间" min-width="160" />
         <el-table-column label="操作" width="132" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>
