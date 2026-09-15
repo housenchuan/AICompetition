@@ -84,13 +84,28 @@ public class RiskScoreEngine {
 
     private int scoreBloodPressure(String bp, ScoreResult r) {
         int[] sd = parseBp(bp);
-        if (sd == null) return 0;
-        for (JsonNode n : ruleService.section("bloodPressure")) {
-            if (sd[0] <= n.get("systolicMax").asInt() && sd[1] <= n.get("diastolicMax").asInt()) {
-                int s = n.get("score").asInt();
-                r.addBreakdown("血压(" + n.get("label").asText() + ")", s);
-                if (s > 0) r.addFactor(n.get("label").asText());
-                return s;
+        if (sd != null) {
+            // 读数（如 145/92）：按收缩压/舒张压区间匹配档位
+            for (JsonNode n : ruleService.section("bloodPressure")) {
+                if (sd[0] <= n.get("systolicMax").asInt() && sd[1] <= n.get("diastolicMax").asInt()) {
+                    int s = n.get("score").asInt();
+                    r.addBreakdown("血压(" + n.get("label").asText() + ")", s);
+                    if (s > 0) r.addFactor(n.get("label").asText());
+                    return s;
+                }
+            }
+            return 0;
+        }
+        // 档位标签（如 血压偏高/1级高血压，来自表单下拉）：直接按 label 匹配
+        String label = safe(bp);
+        if (!label.isEmpty()) {
+            for (JsonNode n : ruleService.section("bloodPressure")) {
+                if (label.equals(n.get("label").asText())) {
+                    int s = n.get("score").asInt();
+                    r.addBreakdown("血压(" + label + ")", s);
+                    if (s > 0) r.addFactor(label);
+                    return s;
+                }
             }
         }
         return 0;

@@ -8,6 +8,7 @@ public class CustomerRiskHisQuery {
     private Integer pageNum = 1;
     private Integer pageSize = 10;
 
+    private String profileId;
     private String customerId;
     private String gender;
     private String occupation;
@@ -15,6 +16,10 @@ public class CustomerRiskHisQuery {
     private String drinkingStatus;
     private Boolean hasSocialInsurance;
     private Integer target;
+
+    /** 血压档位过滤：按收缩压区间匹配历史读数（如 145/92），端点含 */
+    private Integer bpSysMin;
+    private Integer bpSysMax;
 
     private String createdFrom;
     private String createdTo;
@@ -27,8 +32,17 @@ public class CustomerRiskHisQuery {
     public Integer getPageSize() { return pageSize; }
     public void setPageSize(Integer pageSize) { this.pageSize = pageSize; }
 
+    public String getProfileId() { return profileId; }
+    public void setProfileId(String profileId) { this.profileId = profileId; }
+
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
+
+    public Integer getBpSysMin() { return bpSysMin; }
+    public void setBpSysMin(Integer bpSysMin) { this.bpSysMin = bpSysMin; }
+
+    public Integer getBpSysMax() { return bpSysMax; }
+    public void setBpSysMax(Integer bpSysMax) { this.bpSysMax = bpSysMax; }
 
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }

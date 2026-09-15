@@ -61,6 +61,7 @@
         FROM customer_risk_his
         <where>
             <if test="q != null">
+                <if test="q.profileId != null and q.profileId != ''">AND profile_id = #{q.profileId}</if>
                 <if test="q.customerId != null and q.customerId != ''">AND customer_id = #{q.customerId}</if>
                 <if test="q.gender != null and q.gender != ''">AND gender = #{q.gender}</if>
                 <if test="q.occupation != null and q.occupation != ''">AND occupation = #{q.occupation}</if>
@@ -69,11 +70,13 @@
                 <if test="q.hasSocialInsurance != null">AND has_social_insurance = #{q.hasSocialInsurance}</if>
                 <if test="q.target != null">AND target = #{q.target}</if>
             </if>
+            <if test="bpSysMin != null">AND blood_pressure ~ '^[0-9]+/' AND split_part(blood_pressure, '/', 1)::int &gt;= #{bpSysMin}</if>
+            <if test="bpSysMax != null">AND blood_pressure ~ '^[0-9]+/' AND split_part(blood_pressure, '/', 1)::int &lt;= #{bpSysMax}</if>
             <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
             <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
             <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
             <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
         </where>
-        ORDER BY created_at DESC NULLS LAST, profile_id
+        ORDER BY updated_at DESC NULLS LAST, profile_id
     </select>
 </mapper>

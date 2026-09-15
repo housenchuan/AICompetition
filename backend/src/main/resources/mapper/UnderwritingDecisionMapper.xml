@@ -85,14 +85,23 @@
         FROM underwriting_decisions
         <where>
             <if test="q != null">
+                <if test="q.decisionId != null and q.decisionId != ''">AND decision_id = #{q.decisionId}</if>
                 <if test="q.applicationId != null and q.applicationId != ''">AND application_id = #{q.applicationId}</if>
                 <if test="q.customerId != null and q.customerId != ''">AND customer_id = #{q.customerId}</if>
                 <if test="q.gender != null and q.gender != ''">AND gender = #{q.gender}</if>
                 <if test="q.occupation != null and q.occupation != ''">AND occupation = #{q.occupation}</if>
                 <if test="q.riskLevel != null and q.riskLevel != ''">AND risk_level = #{q.riskLevel}</if>
                 <if test="q.underwritingResult != null and q.underwritingResult != ''">AND underwriting_result = #{q.underwritingResult}</if>
+                <if test="q.hasSocialInsurance != null">AND has_social_insurance = #{q.hasSocialInsurance}</if>
+                <if test="q.smokingStatus != null and q.smokingStatus != ''">AND smoking_status = #{q.smokingStatus}</if>
+                <if test="q.drinkingStatus != null and q.drinkingStatus != ''">AND drinking_status = #{q.drinkingStatus}</if>
+                <if test="q.createdBy != null and q.createdBy != ''">AND created_by = #{q.createdBy}</if>
             </if>
+            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
+            <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
+            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
+            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
         </where>
-        ORDER BY created_at DESC NULLS LAST, decision_id
+        ORDER BY updated_at DESC NULLS LAST, decision_id
     </select>
 </mapper>

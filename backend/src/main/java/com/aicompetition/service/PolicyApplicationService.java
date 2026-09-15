@@ -2,6 +2,7 @@ package com.aicompetition.service;
 
 import com.aicompetition.common.DateUtils;
 import com.aicompetition.common.PageResult;
+import com.aicompetition.dto.ApplicationDecisionVO;
 import com.aicompetition.entity.PolicyApplication;
 import com.aicompetition.entity.UnderwritingDecision;
 import com.aicompetition.mapper.PolicyApplicationMapper;
@@ -30,6 +31,7 @@ public class PolicyApplicationService {
 
     public PageResult<PolicyApplication> page(PolicyApplicationQuery query) {
         PolicyApplication q = new PolicyApplication();
+        q.setApplicationId(query.getApplicationId());
         q.setCustomerId(query.getCustomerId());
         q.setProductType(query.getProductType());
         q.setProductName(query.getProductName());
@@ -39,14 +41,28 @@ public class PolicyApplicationService {
 
         LocalDate dateFrom = DateUtils.parseDate(query.getDateFrom());
         LocalDate dateTo = DateUtils.parseDate(query.getDateTo());
+        LocalDateTime createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
+        LocalDateTime createdTo = DateUtils.endOfDay(query.getCreatedTo());
+        LocalDateTime updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
+        LocalDateTime updatedTo = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<PolicyApplication> list = mapper.selectList(q, dateFrom, dateTo);
+        List<PolicyApplication> list = mapper.selectList(q, dateFrom, dateTo,
+                createdFrom, createdTo, updatedFrom, updatedTo);
         return PageResult.of(list);
     }
 
     public PolicyApplication getById(String applicationId) {
         return mapper.selectById(applicationId);
+    }
+
+    /** 投保申请 + 核保决策结果 关联分页查询。 */
+    public PageResult<ApplicationDecisionVO> pageWithDecision(PolicyApplicationQuery query) {
+        LocalDate dateFrom = DateUtils.parseDate(query.getDateFrom());
+        LocalDate dateTo = DateUtils.parseDate(query.getDateTo());
+        PageHelper.startPage(query.getPageNum(), query.getPageSize());
+        List<ApplicationDecisionVO> list = mapper.selectListWithDecision(query, dateFrom, dateTo);
+        return PageResult.of(list);
     }
 
     /** 投保申请与核保决策结果关联查询。 */

@@ -23,3 +23,6 @@ frontend/.vite/
 .env
 .env.local
 application-local.yml
+
+# Claude Code 本地工具配置
+.claude/

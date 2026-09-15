@@ -12,6 +12,7 @@ export const customerRiskApi = {
 // 投保申请
 export const applicationApi = {
   page: (data) => request.post('/api/applications/page', data),
+  pageJoined: (data) => request.post('/api/applications/page-joined', data),
   detail: (id) => request.post(`/api/applications/detail/${id}`),
   withDecision: (id) => request.post(`/api/applications/with-decision/${id}`),
   create: (data) => request.post('/api/applications/create', data),
@@ -37,7 +38,8 @@ export const ruleApi = {
 
 // 数据汇总统计
 export const statApi = {
-  overview: (data) => request.post('/api/stats/overview', data || {})
+  overview: (data) => request.post('/api/stats/overview', data || {}),
+  aggregate: (data) => request.post('/api/stats/aggregate', data)
 }
 
 // 核保预测

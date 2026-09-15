@@ -23,6 +23,7 @@ public class CustomerRiskHisService {
 
     public PageResult<CustomerRiskHis> page(CustomerRiskHisQuery query) {
         CustomerRiskHis q = new CustomerRiskHis();
+        q.setProfileId(query.getProfileId());
         q.setCustomerId(query.getCustomerId());
         q.setGender(query.getGender());
         q.setOccupation(query.getOccupation());
@@ -37,7 +38,8 @@ public class CustomerRiskHisService {
         LocalDateTime updatedTo = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<CustomerRiskHis> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
+        List<CustomerRiskHis> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo,
+                query.getBpSysMin(), query.getBpSysMax());
         return PageResult.of(list);
     }
 

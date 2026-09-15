@@ -94,7 +94,7 @@ public class PredictService {
                 d.getSmokingStatus(), d.getDrinkingStatus(), d.getPersonalMedicalHistory(), d.getFamilyMedicalHistory(),
                 r.getTotalScore(), r.getRiskLevel(), r.getUnderwritingResult(), ruleFactors);
         List<ChatMessage> messages = List.of(ChatMessage.system(sys), ChatMessage.user(user));
-        ChatResponse resp = aiService.chat(messages, 0.3, 256).block();
+        ChatResponse resp = aiService.chat(messages, 0.3, 256).block(java.time.Duration.ofSeconds(20));
         if (resp != null && resp.getChoices() != null && !resp.getChoices().isEmpty()) {
             String content = resp.getChoices().get(0).getMessage().getContent();
             if (content != null && !content.isBlank()) {

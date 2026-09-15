@@ -45,10 +45,22 @@
                   </div>
                 </div>
 
+                <div v-if="m.dist" class="res">
+                  <div class="res-head">{{ m.dist.head }}</div>
+                  <Bars :data="m.dist.bars" color="#FA541C" />
+                  <el-table :data="m.dist.rows" border stripe size="small" max-height="280" style="margin-top:10px">
+                    <el-table-column type="index" label="序号" width="56" />
+                    <el-table-column prop="key" :label="m.dist.label" />
+                    <el-table-column prop="count" label="数量" width="72" />
+                    <el-table-column label="占比" width="80">
+                      <template #default="{ row }">{{ row.percent }}%</template>
+                    </el-table-column>
+                  </el-table>
+                </div>
+
                 <div v-if="m.table" class="res">
                   <div class="res-head">{{ m.table.head }}</div>
                   <el-table :data="m.table.rows" border stripe size="small" max-height="320">
-                    <el-table-column type="index" label="序号" width="56" />
                     <el-table-column v-for="col in m.table.cols" :key="col.prop" :prop="col.prop"
                       :label="col.label" :formatter="col.fmt" :width="col.width" show-overflow-tooltip />
                   </el-table>
@@ -112,8 +124,8 @@ const usage = reactive({})
 
 const tabs = [
   { key: 'query', label: '查询', items: ['帮我查2025年6月的所有投保申请数据', '查已通过的投保申请', '查看所有核保决策结果'] },
-  { key: 'predict', label: '预测', items: ['预测C002的核保决策', '请预测2025年6月所有客户的核保决定'] },
-  { key: 'agg', label: '统计汇总', items: ['帮我统计2025年3月到6月的核保通过率与风险分布', '统计各产品类型的申请数量'] }
+  { key: 'predict', label: '预测', items: ['预测C002的核保决策', '请预测2025年6月所有客户的核保决定', '预测2024年6月的核保结果'] },
+  { key: 'agg', label: '统计汇总', items: ['帮我统计2025年3月到6月的核保通过率与风险分布', '统计各产品类型的申请数量', '统计2024年申请列表中的险种分布情况'] }
 ]
 const currentTab = computed(() => tabs.find(t => t.key === activeTab.value))
 
@@ -163,8 +175,7 @@ async function send() {
     const it = res.data
     am.intent = it
     if (it.intent === 'AGGREGATE') {
-      const r = it.filters?.timeRange || {}
-      am.agg = (await statApi.overview({ dateFrom: r.start, dateTo: r.end })).data
+      await fillAggregate(am, it)
     } else if (it.intent === 'QUERY') {
       await fillQuery(am, it)
     } else if (it.intent === 'PREDICT') {
@@ -184,55 +195,98 @@ async function send() {
 // 列集与各列表页保持一致
 const socialFmt = (row) => (row.hasSocialInsurance ? '是' : '否')
 const targetFmt = (row) => (row.target === 1 ? '有理赔' : row.target === 0 ? '无理赔' : '')
+// 列集与各列表页展示字段保持一致
 const COLS = {
   customer_risk_his: [
-    { prop: 'customerId', label: '客户编号' }, { prop: 'age', label: '年龄' }, { prop: 'gender', label: '性别' },
-    { prop: 'occupation', label: '职业' }, { prop: 'annualIncome', label: '年收入(元)' },
-    { prop: 'hasSocialInsurance', label: '社保', fmt: socialFmt }, { prop: 'smokingStatus', label: '吸烟' },
-    { prop: 'drinkingStatus', label: '饮酒' }, { prop: 'bmi', label: 'BMI' }, { prop: 'bloodPressure', label: '血压' },
-    { prop: 'target', label: '是否理赔', fmt: targetFmt }, { prop: 'scoreV1', label: '首版评分' }, { prop: 'createdAt', label: '创建时间' }
+    { prop: 'profileId', label: '画像唯一标识' }, { prop: 'customerId', label: '投保人编号' },
+    { prop: 'age', label: '年龄' }, { prop: 'gender', label: '性别' }, { prop: 'occupation', label: '职业类别' },
+    { prop: 'annualIncome', label: '年收入(元)' }, { prop: 'hasSocialInsurance', label: '社保', fmt: socialFmt },
+    { prop: 'smokingStatus', label: '吸烟' }, { prop: 'drinkingStatus', label: '饮酒' },
+    { prop: 'bmi', label: 'BMI' }, { prop: 'bloodPressure', label: '血压' },
+    { prop: 'target', label: '是否理赔', fmt: targetFmt }, { prop: 'scoreV1', label: '首版评分' },
+    { prop: 'createdAt', label: '创建时间' }, { prop: 'updatedAt', label: '更新时间' }
   ],
   policy_applications: [
-    { prop: 'applicationId', label: '申请编号' }, { prop: 'customerId', label: '客户编号' },
+    { prop: 'applicationId', label: '投保申请人唯一标识' }, { prop: 'customerId', label: '投保人编号' },
     { prop: 'productType', label: '产品类型' }, { prop: 'productName', label: '产品名称' },
     { prop: 'coverageAmount', label: '保额(元)' }, { prop: 'premium', label: '保费(元)' },
     { prop: 'paymentFrequency', label: '缴费频率' }, { prop: 'insurancePeriod', label: '保障期限' },
-    { prop: 'status', label: '申请状态' }, { prop: 'applicationDate', label: '申请日期' }, { prop: 'createdBy', label: '创建人' }
+    { prop: 'status', label: '申请状态' }, { prop: 'applicationDate', label: '申请日期' },
+    { prop: 'createdBy', label: '创建人' }, { prop: 'createdAt', label: '创建时间' }, { prop: 'updatedAt', label: '更新时间' }
   ],
   underwriting_decisions: [
-    { prop: 'customerId', label: '客户编号' }, { prop: 'applicationId', label: '申请编号' }, { prop: 'age', label: '年龄' },
-    { prop: 'gender', label: '性别' }, { prop: 'occupation', label: '职业' }, { prop: 'riskScore', label: '风险评分' },
-    { prop: 'riskLevel', label: '风险等级' }, { prop: 'underwritingResult', label: '核保结论' },
-    { prop: 'premiumAdjustment', label: '加费比例' }, { prop: 'keyFactors', label: '关键风险因子' }
+    { prop: 'decisionId', label: '核保决策唯一标识' }, { prop: 'customerId', label: '投保人编号' },
+    { prop: 'applicationId', label: '投保申请编号' }, { prop: 'age', label: '年龄' }, { prop: 'gender', label: '性别' },
+    { prop: 'occupation', label: '职业类别' }, { prop: 'hasSocialInsurance', label: '是否有社保', fmt: socialFmt },
+    { prop: 'smokingStatus', label: '吸烟状况' }, { prop: 'drinkingStatus', label: '饮酒状况' },
+    { prop: 'riskScore', label: '风险评分' }, { prop: 'riskLevel', label: '风险等级' },
+    { prop: 'underwritingResult', label: '核保结论' }, { prop: 'premiumAdjustment', label: '加费比例' },
+    { prop: 'keyFactors', label: '关键风险因子' }, { prop: 'createdBy', label: '创建人' },
+    { prop: 'createdAt', label: '创建时间' }, { prop: 'updatedAt', label: '更新时间' }
   ]
 }
 
-async function fillQuery(am, it) {
-  const range = it.filters?.timeRange || {}
-  const params = { pageNum: 1, pageSize: 100 }
-  if (it.filters?.customerId) params.customerId = it.filters.customerId
-  if (it.filters?.status) params.status = it.filters.status
-  if (it.filters?.productType) params.productType = it.filters.productType
-  let res
-  if (it.entity === 'customer_risk_his') {
-    params.createdFrom = range.start; params.createdTo = range.end
-    res = await customerRiskApi.page(params)
-  } else if (it.entity === 'underwriting_decisions') {
-    res = await decisionApi.page(params)
-  } else {
-    params.dateFrom = range.start; params.dateTo = range.end
-    res = await applicationApi.page(params)
+const DIM_LABEL = {
+  productType: '产品类型', status: '申请状态', paymentFrequency: '缴费频率', createdBy: '创建人',
+  riskLevel: '风险等级', underwritingResult: '核保结论', gender: '性别', occupation: '职业',
+  smokingStatus: '吸烟', drinkingStatus: '饮酒', hasSocialInsurance: '社保', target: '是否理赔',
+  customerId: '投保人编号', month: '年月'
+}
+const AGG_ENTITIES = ['policy_applications', 'customer_risk_his', 'underwriting_decisions']
+
+async function fillAggregate(am, it) {
+  const r = it.filters?.timeRange || {}
+  const groupBy = Array.isArray(it.groupBy) && it.groupBy.length ? it.groupBy : null
+  if (!groupBy) {
+    // 无明确维度：回退到整体概览
+    am.agg = (await statApi.overview({ dateFrom: r.start, dateTo: r.end })).data
+    return
   }
+  const entity = AGG_ENTITIES.includes(it.entity) ? it.entity : 'policy_applications'
+  const d = (await statApi.aggregate({ entity, groupBy, dateFrom: r.start, dateTo: r.end })).data
+  if (d.rows) {
+    am.dist = {
+      head: `${DIM_LABEL[groupBy[0]] || groupBy[0]}分布 · 共 ${d.total} 条`,
+      label: DIM_LABEL[groupBy[0]] || groupBy[0],
+      bars: d.rows.map(x => ({ name: x.key, value: x.count })),
+      rows: d.rows
+    }
+  } else {
+    am.agg = (await statApi.overview({ dateFrom: r.start, dateTo: r.end })).data
+  }
+}
+
+async function fillQuery(am, it) {
+  const f = it.filters || {}
+  const range = f.timeRange || {}
+  const params = { pageNum: 1, pageSize: 100 }
+  if (f.customerId) params.customerId = f.customerId
+  if (f.status) params.status = f.status
+  if (f.productType) params.productType = f.productType
+  // 时间范围/单日 → 三类统一按创建时间(created_at)过滤
+  if (range.start) params.createdFrom = range.start
+  if (range.end) params.createdTo = range.end
+  if (f.date) { params.createdFrom = f.date; params.createdTo = f.date }
+  let res
+  if (it.entity === 'customer_risk_his') res = await customerRiskApi.page(params)
+  else if (it.entity === 'underwriting_decisions') res = await decisionApi.page(params)
+  else res = await applicationApi.page(params)
   const entity = COLS[it.entity] ? it.entity : 'policy_applications'
   am.table = { head: `查询结果 · 共 ${res.data.total} 条`, rows: res.data.list, cols: COLS[entity] }
 }
 
 async function fillPredict(am, it) {
   const params = { pageNum: 1, pageSize: 500 }
-  if (it.filters?.customerId) params.customerId = it.filters.customerId
+  const f = it.filters || {}
+  if (f.customerId) params.customerId = f.customerId
+  // 时间范围/单日 → 按核保画像创建时间筛选（与查询/统计口径一致）
+  const r = f.timeRange || {}
+  if (r.start) params.createdFrom = r.start
+  if (r.end) params.createdTo = r.end
+  if (f.date) { params.createdFrom = f.date; params.createdTo = f.date }
   const listRes = await decisionApi.page(params)
   const ids = listRes.data.list.map(d => d.decisionId)
-  if (!ids.length) { am.error = '未找到匹配的核保记录。'; return }
+  if (!ids.length) { am.error = '未找到匹配的核保记录（该条件下暂无核保画像）。'; return }
   const rows = (await predictApi.batch(ids)).data
   am.table = { head: `预测结果 · 共 ${rows.length} 条`, rows, cols: COLS.underwriting_decisions }
 }

@@ -1,5 +1,6 @@
 package com.aicompetition.service;
 
+import com.aicompetition.common.DateUtils;
 import com.aicompetition.common.PageResult;
 import com.aicompetition.entity.UnderwritingDecision;
 import com.aicompetition.mapper.UnderwritingDecisionMapper;
@@ -28,9 +29,19 @@ public class UnderwritingDecisionService {
         q.setOccupation(query.getOccupation());
         q.setRiskLevel(query.getRiskLevel());
         q.setUnderwritingResult(query.getUnderwritingResult());
+        q.setDecisionId(query.getDecisionId());
+        q.setHasSocialInsurance(query.getHasSocialInsurance());
+        q.setSmokingStatus(query.getSmokingStatus());
+        q.setDrinkingStatus(query.getDrinkingStatus());
+        q.setCreatedBy(query.getCreatedBy());
+
+        LocalDateTime createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
+        LocalDateTime createdTo = DateUtils.endOfDay(query.getCreatedTo());
+        LocalDateTime updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
+        LocalDateTime updatedTo = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<UnderwritingDecision> list = mapper.selectList(q);
+        List<UnderwritingDecision> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
         return PageResult.of(list);
     }
 

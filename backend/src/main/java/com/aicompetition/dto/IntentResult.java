@@ -25,6 +25,9 @@ public class IntentResult {
     /** 统计指标，如 pass_rate、risk_level_distribution、count */
     private List<String> metrics;
 
+    /** 统计分组维度（AGGREGATE 用），白名单字段名，如 productType/status/riskLevel/gender/month */
+    private List<String> groupBy;
+
     /** 过滤条件：customerId / customerName / timeRange{start,end} / date / status / productType 等 */
     private Map<String, Object> filters = new HashMap<>();
 
@@ -45,6 +48,9 @@ public class IntentResult {
 
     public List<String> getMetrics() { return metrics; }
     public void setMetrics(List<String> metrics) { this.metrics = metrics; }
+
+    public List<String> getGroupBy() { return groupBy; }
+    public void setGroupBy(List<String> groupBy) { this.groupBy = groupBy; }
 
     public Map<String, Object> getFilters() { return filters; }
     public void setFilters(Map<String, Object> filters) { this.filters = filters; }

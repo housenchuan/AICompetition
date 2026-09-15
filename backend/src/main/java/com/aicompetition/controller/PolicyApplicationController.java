@@ -2,6 +2,7 @@ package com.aicompetition.controller;
 
 import com.aicompetition.common.PageResult;
 import com.aicompetition.common.Result;
+import com.aicompetition.dto.ApplicationDecisionVO;
 import com.aicompetition.entity.PolicyApplication;
 import com.aicompetition.query.PolicyApplicationQuery;
 import com.aicompetition.service.PolicyApplicationService;
@@ -25,6 +26,12 @@ public class PolicyApplicationController {
     @PostMapping("/page")
     public Result<PageResult<PolicyApplication>> page(@RequestBody(required = false) PolicyApplicationQuery query) {
         return Result.ok(service.page(query == null ? new PolicyApplicationQuery() : query));
+    }
+
+    /** 投保申请 + 核保决策结果 关联分页查询。 */
+    @PostMapping("/page-joined")
+    public Result<PageResult<ApplicationDecisionVO>> pageJoined(@RequestBody(required = false) PolicyApplicationQuery query) {
+        return Result.ok(service.pageWithDecision(query == null ? new PolicyApplicationQuery() : query));
     }
 
     @PostMapping("/detail/{applicationId}")
