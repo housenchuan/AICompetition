@@ -203,11 +203,12 @@
               </el-form-item></el-col>
               <el-col :span="12"><el-form-item label="BMI"><el-input-number v-model="decForm.bmi" :min="0" :precision="2" :controls="false" style="width:100%" /></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="血压">
-                <el-select v-model="decForm.bloodPressure" placeholder="请选择血压档位" style="width:100%">
-                  <el-option label="正常血压（＜120/＜80）" value="正常血压" />
-                  <el-option label="血压偏高（120~139/80~89）" value="血压偏高" />
-                  <el-option label="1级高血压（140~159/90~99）" value="1级高血压" />
-                  <el-option label="2级高血压（≥160/≥100）" value="2级高血压" />
+                <el-select v-model="decForm.bloodPressure" placeholder="请选择血压情况" style="width:100%">
+                  <el-option label="正常" value="正常" />
+                  <el-option label="正常高值" value="正常高值" />
+                  <el-option label="临界高血压" value="临界高血压" />
+                  <el-option label="轻度高血压" value="轻度高血压" />
+                  <el-option label="中度高血压" value="中度高血压" />
                 </el-select>
               </el-form-item></el-col>
               <el-col :span="24"><el-form-item label="家族病史"><el-input v-model="decForm.familyMedicalHistory" type="textarea" :rows="2" /></el-form-item></el-col>

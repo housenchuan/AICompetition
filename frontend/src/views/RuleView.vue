@@ -21,8 +21,6 @@
         <div class="sec-title">② 血压评分</div>
         <el-table :data="rules.bloodPressure" border size="small">
           <el-table-column prop="label" label="分类" />
-          <el-table-column label="收缩压 ≤"><template #default="{ row }">{{ cap(row.systolicMax) }}</template></el-table-column>
-          <el-table-column label="舒张压 ≤"><template #default="{ row }">{{ cap(row.diastolicMax) }}</template></el-table-column>
           <el-table-column label="风险加分"><template #default="{ row }"><b class="score">+{{ row.score }}</b></template></el-table-column>
         </el-table>
       </div>
@@ -122,7 +120,6 @@ function fmtAge(min, max) {
   if (min <= 0) return `${max} 岁以下`
   return `${min} ~ ${max} 岁`
 }
-function cap(v) { return v >= 999 ? '不限' : v }
 function scoreRange(row) {
   if (row.minScore < 0) return '直接判定'
   if (row.maxScore >= 999) return `≥ ${row.minScore}`

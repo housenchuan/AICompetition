@@ -27,7 +27,5 @@ public interface CustomerRiskHisMapper {
                                      @Param("createdFrom") LocalDateTime createdFrom,
                                      @Param("createdTo") LocalDateTime createdTo,
                                      @Param("updatedFrom") LocalDateTime updatedFrom,
-                                     @Param("updatedTo") LocalDateTime updatedTo,
-                                     @Param("bpSysMin") Integer bpSysMin,
-                                     @Param("bpSysMax") Integer bpSysMax);
+                                     @Param("updatedTo") LocalDateTime updatedTo);
 }

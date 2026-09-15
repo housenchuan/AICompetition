@@ -104,7 +104,7 @@ public class StatService {
         } else if ("customer_risk_his".equals(entity)) {
             LocalDateTime from = DateUtils.startOfDay(q.getDateFrom());
             LocalDateTime to = DateUtils.endOfDay(q.getDateTo());
-            for (CustomerRiskHis c : customerRiskHisMapper.selectList(new CustomerRiskHis(), from, to, null, null, null, null)) rows.add(c);
+            for (CustomerRiskHis c : customerRiskHisMapper.selectList(new CustomerRiskHis(), from, to, null, null)) rows.add(c);
             extractors.put("gender", o -> ((CustomerRiskHis) o).getGender());
             extractors.put("occupation", o -> ((CustomerRiskHis) o).getOccupation());
             extractors.put("smokingStatus", o -> ((CustomerRiskHis) o).getSmokingStatus());

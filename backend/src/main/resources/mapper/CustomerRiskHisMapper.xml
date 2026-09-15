@@ -69,9 +69,8 @@
                 <if test="q.drinkingStatus != null and q.drinkingStatus != ''">AND drinking_status = #{q.drinkingStatus}</if>
                 <if test="q.hasSocialInsurance != null">AND has_social_insurance = #{q.hasSocialInsurance}</if>
                 <if test="q.target != null">AND target = #{q.target}</if>
+                <if test="q.bloodPressure != null and q.bloodPressure != ''">AND blood_pressure = #{q.bloodPressure}</if>
             </if>
-            <if test="bpSysMin != null">AND blood_pressure ~ '^[0-9]+/' AND split_part(blood_pressure, '/', 1)::int &gt;= #{bpSysMin}</if>
-            <if test="bpSysMax != null">AND blood_pressure ~ '^[0-9]+/' AND split_part(blood_pressure, '/', 1)::int &lt;= #{bpSysMax}</if>
             <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
             <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
             <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>

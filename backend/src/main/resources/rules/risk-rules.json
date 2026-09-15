@@ -8,11 +8,13 @@
     { "min": 28.1, "max": 32.1,  "label": "肥胖",     "score": 15 },
     { "min": 32.1, "max": 999,   "label": "严重肥胖", "score": 30 }
   ],
+  "bloodPressureNote": "血压按 5 个分类标签直接匹配计分（赛题给定固定规则）。",
   "bloodPressure": [
-    { "label": "正常血压",   "systolicMax": 119, "diastolicMax": 79,  "score": 0 },
-    { "label": "血压偏高",   "systolicMax": 139, "diastolicMax": 89,  "score": 5 },
-    { "label": "1级高血压", "systolicMax": 159, "diastolicMax": 99,  "score": 15 },
-    { "label": "2级高血压", "systolicMax": 999, "diastolicMax": 999, "score": 30 }
+    { "label": "正常",       "score": 0 },
+    { "label": "正常高值",   "score": 0 },
+    { "label": "临界高血压", "score": 5 },
+    { "label": "轻度高血压", "score": 15 },
+    { "label": "中度高血压", "score": 30 }
   ],
   "smoking": [
     { "status": "不吸烟", "keywords": ["不吸烟", "否", "无"],   "score": 0 },
@@ -54,7 +56,7 @@
     { "level": "标准体",     "result": "标保（标准费率承保）",        "minScore": 0,  "maxScore": 30,  "claimProb": "< 47.5%",        "premiumAdjustment": 1.0 },
     { "level": "次标体A级",  "result": "加费承保（加费10%~20%）",      "minScore": 31, "maxScore": 50,  "claimProb": "[47.5%, 67.5%)", "premiumAdjustment": 1.15 },
     { "level": "次标体B级",  "result": "加费承保（加费20%~50%）或除外", "minScore": 51, "maxScore": 75,  "claimProb": "[67.5%, 82.5%)", "premiumAdjustment": 1.35 },
-    { "level": "高风险体",   "result": "延期承保并加费50%以上",         "minScore": 76, "maxScore": 999, "claimProb": ">= 82.5%",       "premiumAdjustment": 1.6 },
+    { "level": "高风险体",   "result": "延期承保并加费50%以上",         "minScore": 76, "maxScore": 999, "claimProb": "[82.5%, 97.5%)", "premiumAdjustment": 1.6 },
     { "level": "拒保体",     "result": "拒保",                          "minScore": -1, "maxScore": -1,  "claimProb": "-",              "premiumAdjustment": 1.0 }
   ],
   "levelsNote": "分数区间为 V1 暂定值，需结合历史理赔概率分位（47.5% / 67.5% / 82.5%）用样本数据校准（对应评分点 2.1.3）。",

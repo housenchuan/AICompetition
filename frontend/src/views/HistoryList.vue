@@ -23,10 +23,11 @@
           <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="血压情况">
               <el-select v-model="bpCategory" placeholder="全部" clearable style="width: 100%">
-                <el-option label="正常血压（＜120/＜80）" value="正常血压" />
-                <el-option label="血压偏高（120-139/80-89）" value="血压偏高" />
-                <el-option label="1级高血压（140-159/90-99）" value="1级高血压" />
-                <el-option label="2级高血压（≥160/≥100）" value="2级高血压" />
+                <el-option label="正常" value="正常" />
+                <el-option label="正常高值" value="正常高值" />
+                <el-option label="临界高血压" value="临界高血压" />
+                <el-option label="轻度高血压" value="轻度高血压" />
+                <el-option label="中度高血压" value="中度高血压" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -138,14 +139,6 @@ const smokingFilters = [ { text: '是', value: '是' }, { text: '否', value: '�
 const drinkingFilters = [ { text: '是', value: '是' }, { text: '否', value: '否' }, { text: '偶尔', value: '偶尔' } ]
 const targetFilters = [ { text: '有理赔', value: 1 }, { text: '无理赔', value: 0 } ]
 
-// 血压档位 → 收缩压区间（历史读数按收缩压归档）
-const BP_RANGE = {
-  '正常血压': [null, 119],
-  '血压偏高': [120, 139],
-  '1级高血压': [140, 159],
-  '2级高血压': [160, null]
-}
-
 const query = reactive({
   pageNum: 1,
   pageSize: 10,
@@ -167,9 +160,7 @@ async function load() {
     params.createdTo = createdRange.value?.[1]
     params.updatedFrom = updatedRange.value?.[0]
     params.updatedTo = updatedRange.value?.[1]
-    const rng = BP_RANGE[bpCategory.value]
-    params.bpSysMin = rng ? rng[0] : null
-    params.bpSysMax = rng ? rng[1] : null
+    params.bloodPressure = bpCategory.value || null
     const res = await customerRiskApi.page(params)
     rows.value = res.data.list
     total.value = res.data.total

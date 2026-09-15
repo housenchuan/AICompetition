@@ -31,6 +31,7 @@ public class CustomerRiskHisService {
         q.setDrinkingStatus(query.getDrinkingStatus());
         q.setHasSocialInsurance(query.getHasSocialInsurance());
         q.setTarget(query.getTarget());
+        q.setBloodPressure(query.getBloodPressure());
 
         LocalDateTime createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
         LocalDateTime createdTo = DateUtils.endOfDay(query.getCreatedTo());
@@ -38,8 +39,7 @@ public class CustomerRiskHisService {
         LocalDateTime updatedTo = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<CustomerRiskHis> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo,
-                query.getBpSysMin(), query.getBpSysMax());
+        List<CustomerRiskHis> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
         return PageResult.of(list);
     }
 

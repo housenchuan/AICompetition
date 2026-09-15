@@ -17,9 +17,8 @@ public class CustomerRiskHisQuery {
     private Boolean hasSocialInsurance;
     private Integer target;
 
-    /** 血压档位过滤：按收缩压区间匹配历史读数（如 145/92），端点含 */
-    private Integer bpSysMin;
-    private Integer bpSysMax;
+    /** 血压情况过滤：按分类标签等值匹配（正常/正常高值/临界高血压/轻度高血压/中度高血压） */
+    private String bloodPressure;
 
     private String createdFrom;
     private String createdTo;
@@ -38,11 +37,8 @@ public class CustomerRiskHisQuery {
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
 
-    public Integer getBpSysMin() { return bpSysMin; }
-    public void setBpSysMin(Integer bpSysMin) { this.bpSysMin = bpSysMin; }
-
-    public Integer getBpSysMax() { return bpSysMax; }
-    public void setBpSysMax(Integer bpSysMax) { this.bpSysMax = bpSysMax; }
+    public String getBloodPressure() { return bloodPressure; }
+    public void setBloodPressure(String bloodPressure) { this.bloodPressure = bloodPressure; }
 
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }

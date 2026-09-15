@@ -83,29 +83,15 @@ public class RiskScoreEngine {
     }
 
     private int scoreBloodPressure(String bp, ScoreResult r) {
-        int[] sd = parseBp(bp);
-        if (sd != null) {
-            // 读数（如 145/92）：按收缩压/舒张压区间匹配档位
-            for (JsonNode n : ruleService.section("bloodPressure")) {
-                if (sd[0] <= n.get("systolicMax").asInt() && sd[1] <= n.get("diastolicMax").asInt()) {
-                    int s = n.get("score").asInt();
-                    r.addBreakdown("血压(" + n.get("label").asText() + ")", s);
-                    if (s > 0) r.addFactor(n.get("label").asText());
-                    return s;
-                }
-            }
-            return 0;
-        }
-        // 档位标签（如 血压偏高/1级高血压，来自表单下拉）：直接按 label 匹配
+        // 血压为分类标签（正常/正常高值/临界高血压/轻度高血压/中度高血压）：按 label 精确匹配
         String label = safe(bp);
-        if (!label.isEmpty()) {
-            for (JsonNode n : ruleService.section("bloodPressure")) {
-                if (label.equals(n.get("label").asText())) {
-                    int s = n.get("score").asInt();
-                    r.addBreakdown("血压(" + label + ")", s);
-                    if (s > 0) r.addFactor(label);
-                    return s;
-                }
+        if (label.isEmpty()) return 0;
+        for (JsonNode n : ruleService.section("bloodPressure")) {
+            if (label.equals(n.get("label").asText())) {
+                int s = n.get("score").asInt();
+                r.addBreakdown("血压(" + label + ")", s);
+                if (s > 0) r.addFactor(label);
+                return s;
             }
         }
         return 0;
@@ -206,18 +192,6 @@ public class RiskScoreEngine {
             if (text.contains(d.asText())) return true;
         }
         return false;
-    }
-
-    private int[] parseBp(String bp) {
-        if (bp == null) return null;
-        String s = bp.replaceAll("[^0-9/]", "");
-        String[] parts = s.split("/");
-        if (parts.length < 2) return null;
-        try {
-            return new int[]{ Integer.parseInt(parts[0]), Integer.parseInt(parts[1]) };
-        } catch (NumberFormatException e) {
-            return null;
-        }
     }
 
     private String safe(String s) {

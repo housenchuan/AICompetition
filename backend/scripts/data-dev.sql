@@ -8,9 +8,9 @@ INSERT INTO customer_risk_his
  smoking_status, drinking_status, family_medical_history, personal_medical_history,
  bmi, blood_pressure, created_at, updated_at, target, score_v1)
 VALUES
-('P001','C001',30,'男','办公室职员',180000,true,'否','否','无','无',22.0,'118/76','2025-06-03 10:00:00','2025-06-03 10:00:00',0,0),
-('P002','C002',55,'男','司机',120000,true,'是','是','父亲高血压','2型糖尿病',29.0,'145/92','2025-06-10 09:30:00','2025-06-10 09:30:00',1,80),
-('P003','C003',62,'女','退休',90000,true,'否','偶尔','无','恶性肿瘤病史',24.0,'130/85','2025-05-20 14:00:00','2025-05-20 14:00:00',1,0);
+('P001','C001',30,'男','办公室职员',180000,true,'否','否','无','无',22.0,'正常','2025-06-03 10:00:00','2025-06-03 10:00:00',0,0),
+('P002','C002',55,'男','司机',120000,true,'是','是','父亲高血压','2型糖尿病',29.0,'轻度高血压','2025-06-10 09:30:00','2025-06-10 09:30:00',1,80),
+('P003','C003',62,'女','退休',90000,true,'否','偶尔','无','恶性肿瘤病史',24.0,'正常高值','2025-05-20 14:00:00','2025-05-20 14:00:00',1,0);
 
 INSERT INTO policy_applications
 (application_id, customer_id, product_type, product_name, coverage_amount, premium,
@@ -49,9 +49,9 @@ INSERT INTO underwriting_decisions
  smoking_status, drinking_status, family_medical_history, personal_medical_history, bmi, blood_pressure,
  risk_score, risk_level, underwriting_result, premium_adjustment, key_factors, created_by, created_at, updated_at)
 VALUES
-('D001','A001','C001',30,'男','办公室职员',180000,true,'否','否','无','无',22.0,'118/76',
+('D001','A001','C001',30,'男','办公室职员',180000,true,'否','否','无','无',22.0,'正常',
  NULL,NULL,NULL,NULL,NULL,'系统','2025-06-05 10:06:00','2025-06-05 10:06:00'),
-('D002','A002','C002',55,'男','司机',120000,true,'是','是','父亲高血压','2型糖尿病',29.0,'145/92',
+('D002','A002','C002',55,'男','司机',120000,true,'是','是','父亲高血压','2型糖尿病',29.0,'轻度高血压',
  NULL,NULL,NULL,NULL,NULL,'系统','2025-06-12 09:41:00','2025-06-12 09:41:00');
 
 -- 为 2024 年申请补齐核保决策画像（风险字段留空=待预测，created_at=申请创建时间），供 NLP「预测2024年X月」等演示
@@ -71,7 +71,7 @@ SELECT
   '无',
   CASE WHEN rn % 7 = 0 THEN '2型糖尿病' ELSE '无' END,
   round((20 + (rn * 3 % 15) + 0.5)::numeric, 2),
-  (ARRAY['正常血压','血压偏高','1级高血压','2级高血压'])[1 + rn % 4],
+  (ARRAY['正常','正常高值','临界高血压','轻度高血压','中度高血压'])[1 + rn % 5],
   '系统', pa.created_at, pa.created_at
 FROM (
   SELECT *, row_number() OVER (ORDER BY application_id) AS rn
