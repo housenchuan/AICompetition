@@ -53,3 +53,11 @@ export const predictApi = {
 export const nlApi = {
   parse: (text) => request.post('/api/nl/parse', { text })
 }
+
+// 用户反馈
+export const feedbackApi = {
+  list: (data) => request.post('/api/feedback/list', data),
+  stats: () => request.post('/api/feedback/stats'),
+  create: (data) => request.post('/api/feedback/create', data),
+  update: (id, data) => request.post(`/api/feedback/update/${id}`, data)
+}

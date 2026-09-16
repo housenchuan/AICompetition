@@ -45,6 +45,9 @@
           <el-menu-item index="/rules">
             <span class="mi" v-html="icons.rules"></span><span>风险计分规则</span>
           </el-menu-item>
+          <el-menu-item index="/feedback">
+            <span class="mi" v-html="icons.bulb"></span><span>用户反馈</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -52,16 +55,26 @@
         <router-view />
       </el-main>
     </el-container>
+
+    <!-- 全局灯泡浮动按钮 -->
+    <div class="fab-bulb" title="提交反馈" @click="feedbackVisible = true">
+      <span v-html="icons.bulb"></span>
+    </div>
+
+    <!-- 全局反馈弹框 -->
+    <FeedbackDialog v-model="feedbackVisible" />
   </el-container>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { icons } from '../icons'
+import FeedbackDialog from '../components/FeedbackDialog.vue'
 
 const route = useRoute()
 const activeMenu = computed(() => route.path)
+const feedbackVisible = ref(false)
 </script>
 
 <style scoped>
@@ -136,4 +149,27 @@ const activeMenu = computed(() => route.path)
 .mi :deep(svg) { width: 16px; height: 16px; }
 
 .main { padding: 18px; background: var(--page-bg); overflow-y: auto; }
+
+.fab-bulb {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-light));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(250, 84, 28, 0.45);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 999;
+}
+.fab-bulb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(250, 84, 28, 0.55);
+}
+.fab-bulb :deep(svg) { width: 22px; height: 22px; }
 </style>
