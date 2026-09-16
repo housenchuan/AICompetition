@@ -34,15 +34,15 @@ public class PolicyApplicationController {
         return Result.ok(service.pageWithDecision(query == null ? new PolicyApplicationQuery() : query));
     }
 
-    @PostMapping("/detail/{applicationId}")
-    public Result<PolicyApplication> detail(@PathVariable String applicationId) {
-        return Result.ok(service.getById(applicationId));
+    @PostMapping("/detail/{profileId}")
+    public Result<PolicyApplication> detail(@PathVariable String profileId) {
+        return Result.ok(service.getById(profileId));
     }
 
     /** 投保申请 + 核保决策结果关联查询。 */
-    @PostMapping("/with-decision/{applicationId}")
-    public Result<Map<String, Object>> withDecision(@PathVariable String applicationId) {
-        return Result.ok(service.getWithDecision(applicationId));
+    @PostMapping("/with-decision/{profileId}")
+    public Result<Map<String, Object>> withDecision(@PathVariable String profileId) {
+        return Result.ok(service.getWithDecision(profileId));
     }
 
     @PostMapping("/create")
@@ -50,14 +50,14 @@ public class PolicyApplicationController {
         return Result.ok(service.create(entity));
     }
 
-    @PostMapping("/update/{applicationId}")
-    public Result<PolicyApplication> update(@PathVariable String applicationId, @RequestBody PolicyApplication entity) {
-        entity.setApplicationId(applicationId);
+    @PostMapping("/update/{profileId}")
+    public Result<PolicyApplication> update(@PathVariable String profileId, @RequestBody PolicyApplication entity) {
+        entity.setProfileId(profileId);
         return Result.ok(service.update(entity));
     }
 
-    @PostMapping("/delete/{applicationId}")
-    public Result<Integer> delete(@PathVariable String applicationId) {
-        return Result.ok(service.delete(applicationId));
+    @PostMapping("/delete/{profileId}")
+    public Result<Integer> delete(@PathVariable String profileId) {
+        return Result.ok(service.delete(profileId));
     }
 }

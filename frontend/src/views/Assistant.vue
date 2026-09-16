@@ -207,7 +207,7 @@ const COLS = {
     { prop: 'createdAt', label: '创建时间' }, { prop: 'updatedAt', label: '更新时间' }
   ],
   policy_applications: [
-    { prop: 'applicationId', label: '投保申请人唯一标识' }, { prop: 'customerId', label: '投保人编号' },
+    { prop: 'profileId', label: '投保申请人唯一标识' }, { prop: 'customerId', label: '投保人编号' },
     { prop: 'productType', label: '产品类型' }, { prop: 'productName', label: '产品名称' },
     { prop: 'coverageAmount', label: '保额(元)' }, { prop: 'premium', label: '保费(元)' },
     { prop: 'paymentFrequency', label: '缴费频率' }, { prop: 'insurancePeriod', label: '保障期限' },

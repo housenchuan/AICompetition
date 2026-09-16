@@ -50,7 +50,7 @@ CREATE INDEX IF NOT EXISTS idx_crh_updated_at ON customer_risk_his (updated_at);
 
 -- 2、投保申请记录表
 CREATE TABLE IF NOT EXISTS policy_applications (
-    application_id           VARCHAR(32)  PRIMARY KEY,
+    profile_id               VARCHAR(32)  PRIMARY KEY,
     customer_id              VARCHAR(32)  NOT NULL,
     product_type             VARCHAR(50),
     product_name             VARCHAR(100),
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS policy_applications (
 );
 
 COMMENT ON TABLE  policy_applications                          IS '投保申请记录表';
-COMMENT ON COLUMN policy_applications.application_id           IS '投保申请唯一标识（主键）';
+COMMENT ON COLUMN policy_applications.profile_id               IS '画像唯一标识（主键）';
 COMMENT ON COLUMN policy_applications.customer_id              IS '投保人编号';
 COMMENT ON COLUMN policy_applications.product_type             IS '产品类型 寿险/医疗险/意外险等';
 COMMENT ON COLUMN policy_applications.product_name             IS '产品名称';

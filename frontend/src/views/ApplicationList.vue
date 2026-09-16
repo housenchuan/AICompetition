@@ -7,7 +7,7 @@
         <el-row :gutter="12">
           <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="投保申请人唯一标识">
-              <el-input v-model="query.applicationId" placeholder="如 A001" clearable />
+              <el-input v-model="query.profileId" placeholder="如 PRF…" clearable />
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="12" :md="8" :xl="6">
@@ -53,7 +53,7 @@
       </div>
       <el-table ref="tableRef" :data="rows" v-loading="loading" border stripe size="small"
         max-height="calc(100vh - 330px)" scrollbar-always-on @filter-change="onFilter">
-        <el-table-column prop="applicationId" label="投保申请人唯一标识" width="150" fixed="left" show-overflow-tooltip />
+        <el-table-column prop="profileId" label="投保申请人唯一标识" width="150" fixed="left" show-overflow-tooltip />
         <el-table-column prop="customerId" label="投保人编号" min-width="100" />
         <el-table-column prop="productType" label="产品类型" min-width="100" column-key="productType"
           :filters="productTypeFilters" :filter-multiple="false" />
@@ -90,7 +90,7 @@
       <template v-if="current">
         <div class="sec-title">投保申请信息</div>
         <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="投保申请人唯一标识">{{ current.applicationId }}</el-descriptions-item>
+          <el-descriptions-item label="投保申请人唯一标识">{{ current.profileId }}</el-descriptions-item>
           <el-descriptions-item label="投保人编号">{{ current.customerId }}</el-descriptions-item>
           <el-descriptions-item label="产品类型">{{ current.productType }}</el-descriptions-item>
           <el-descriptions-item label="产品名称">{{ current.productName }}</el-descriptions-item>
@@ -257,7 +257,7 @@ const statusFilters = [
 const query = reactive({
   pageNum: 1,
   pageSize: 10,
-  applicationId: '',
+  profileId: '',
   customerId: '',
   productType: '',
   status: '',
@@ -299,7 +299,7 @@ function onFilter(filters) {
 
 function search() { query.pageNum = 1; load() }
 function reset() {
-  query.applicationId = ''
+  query.profileId = ''
   query.customerId = ''
   query.productType = ''
   query.status = ''
@@ -316,7 +316,7 @@ function onSize(s) { query.pageSize = s; query.pageNum = 1; load() }
 
 // 详情：一次拉回投保申请 + 关联核保决策（联合展示）
 async function openDetail(row) {
-  const res = await applicationApi.withDecision(row.applicationId)
+  const res = await applicationApi.withDecision(row.profileId)
   current.value = res.data.application
   decision.value = res.data.decision
   detailVisible.value = true
@@ -332,7 +332,7 @@ const decForm = ref({})
 
 function emptyApp() {
   return {
-    applicationId: null, customerId: '', productType: '', productName: '',
+    profileId: null, customerId: '', productType: '', productName: '',
     coverageAmount: null, premium: null, paymentFrequency: '', insurancePeriod: '',
     waitingPeriod: null, beneficiaryRelationship: '', applicationDate: '', status: '待核保'
   }
@@ -356,7 +356,7 @@ function openCreate() {
 async function openEdit(row) {
   editing.value = true
   step.value = 1
-  const res = await applicationApi.withDecision(row.applicationId)
+  const res = await applicationApi.withDecision(row.profileId)
   appForm.value = { ...res.data.application }
   decForm.value = res.data.decision ? { ...res.data.decision } : emptyDec()
   formVisible.value = true
@@ -366,8 +366,8 @@ async function saveForm() {
   saving.value = true
   try {
     if (editing.value) {
-      await applicationApi.update(appForm.value.applicationId, appForm.value)
-      const dec = { ...decForm.value, applicationId: appForm.value.applicationId, customerId: appForm.value.customerId }
+      await applicationApi.update(appForm.value.profileId, appForm.value)
+      const dec = { ...decForm.value, applicationId: appForm.value.profileId, customerId: appForm.value.customerId }
       if (dec.decisionId) {
         await decisionApi.update(dec.decisionId, dec)
       } else {
@@ -377,7 +377,7 @@ async function saveForm() {
     } else {
       const appRes = await applicationApi.create(appForm.value)
       const app = appRes.data
-      await decisionApi.create({ ...decForm.value, applicationId: app.applicationId, customerId: app.customerId })
+      await decisionApi.create({ ...decForm.value, applicationId: app.profileId, customerId: app.customerId })
       ElMessage.success('新增成功，可在「核保决策结果」页发起预测')
     }
     formVisible.value = false

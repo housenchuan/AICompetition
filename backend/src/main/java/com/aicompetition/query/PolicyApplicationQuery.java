@@ -8,7 +8,7 @@ public class PolicyApplicationQuery {
     private Integer pageNum = 1;
     private Integer pageSize = 10;
 
-    private String applicationId;
+    private String profileId;
     private String customerId;
     private String productType;
     private String productName;
@@ -34,8 +34,8 @@ public class PolicyApplicationQuery {
     public Integer getPageSize() { return pageSize; }
     public void setPageSize(Integer pageSize) { this.pageSize = pageSize; }
 
-    public String getApplicationId() { return applicationId; }
-    public void setApplicationId(String applicationId) { this.applicationId = applicationId; }
+    public String getProfileId() { return profileId; }
+    public void setProfileId(String profileId) { this.profileId = profileId; }
 
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }

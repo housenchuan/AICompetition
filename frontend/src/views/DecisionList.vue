@@ -123,7 +123,7 @@
         <div class="sec-title">投保申请信息</div>
         <el-empty v-if="!detailApp" description="无关联投保申请" :image-size="60" />
         <el-descriptions v-else :column="2" border size="small">
-          <el-descriptions-item label="申请编号">{{ detailApp.applicationId }}</el-descriptions-item>
+          <el-descriptions-item label="申请编号">{{ detailApp.profileId }}</el-descriptions-item>
           <el-descriptions-item label="投保人编号">{{ detailApp.customerId }}</el-descriptions-item>
           <el-descriptions-item label="产品类型">{{ detailApp.productType }}</el-descriptions-item>
           <el-descriptions-item label="产品名称">{{ detailApp.productName }}</el-descriptions-item>

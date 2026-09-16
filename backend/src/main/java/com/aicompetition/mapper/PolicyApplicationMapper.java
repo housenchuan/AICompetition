@@ -18,9 +18,9 @@ public interface PolicyApplicationMapper {
 
     int updateById(PolicyApplication entity);
 
-    int deleteById(@Param("applicationId") String applicationId);
+    int deleteById(@Param("profileId") String profileId);
 
-    PolicyApplication selectById(@Param("applicationId") String applicationId);
+    PolicyApplication selectById(@Param("profileId") String profileId);
 
     /**
      * 条件查询。q 中的非空字段作等值过滤；申请日期支持范围过滤（可为空）。

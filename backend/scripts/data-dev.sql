@@ -13,7 +13,7 @@ VALUES
 ('P003','C003',62,'女','退休',90000,true,'否','偶尔','无','恶性肿瘤病史',24.0,'正常高值','2025-05-20 14:00:00','2025-05-20 14:00:00',1,0);
 
 INSERT INTO policy_applications
-(application_id, customer_id, product_type, product_name, coverage_amount, premium,
+(profile_id, customer_id, product_type, product_name, coverage_amount, premium,
  payment_frequency, insurance_period, waiting_period, beneficiary_relationship,
  application_date, status, created_by, created_at, updated_at)
 VALUES
@@ -60,7 +60,7 @@ INSERT INTO underwriting_decisions
  has_social_insurance, smoking_status, drinking_status, family_medical_history,
  personal_medical_history, bmi, blood_pressure, created_by, created_at, updated_at)
 SELECT
-  'D' || substring(pa.application_id from 2), pa.application_id, pa.customer_id,
+  'D' || substring(pa.profile_id from 2), pa.profile_id, pa.customer_id,
   28 + (rn * 7 % 45),
   CASE WHEN rn % 2 = 0 THEN '男' ELSE '女' END,
   (ARRAY['办公室职员','教师','司机','建筑工人','厨师','个体从业者'])[1 + rn % 6],
@@ -74,6 +74,6 @@ SELECT
   (ARRAY['正常','正常高值','临界高血压','轻度高血压','中度高血压'])[1 + rn % 5],
   '系统', pa.created_at, pa.created_at
 FROM (
-  SELECT *, row_number() OVER (ORDER BY application_id) AS rn
-  FROM policy_applications WHERE application_id LIKE 'A24%'
+  SELECT *, row_number() OVER (ORDER BY profile_id) AS rn
+  FROM policy_applications WHERE profile_id LIKE 'A24%'
 ) pa;

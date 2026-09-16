@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class ApplicationDecisionVO {
 
     // ===== 投保申请字段 =====
-    private String applicationId;
+    private String profileId;
     private String customerId;
     private String productType;
     private String productName;
@@ -35,8 +35,8 @@ public class ApplicationDecisionVO {
     private BigDecimal premiumAdjustment;
     private String keyFactors;
 
-    public String getApplicationId() { return applicationId; }
-    public void setApplicationId(String applicationId) { this.applicationId = applicationId; }
+    public String getProfileId() { return profileId; }
+    public void setProfileId(String profileId) { this.profileId = profileId; }
 
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }

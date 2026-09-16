@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  */
 public class PolicyApplication {
 
-    private String applicationId;
+    private String profileId;
     private String customerId;
     private String productType;
     private String productName;
@@ -25,8 +25,8 @@ public class PolicyApplication {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public String getApplicationId() { return applicationId; }
-    public void setApplicationId(String applicationId) { this.applicationId = applicationId; }
+    public String getProfileId() { return profileId; }
+    public void setProfileId(String profileId) { this.profileId = profileId; }
 
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }

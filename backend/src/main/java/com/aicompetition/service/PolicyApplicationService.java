@@ -31,7 +31,7 @@ public class PolicyApplicationService {
 
     public PageResult<PolicyApplication> page(PolicyApplicationQuery query) {
         PolicyApplication q = new PolicyApplication();
-        q.setApplicationId(query.getApplicationId());
+        q.setProfileId(query.getProfileId());
         q.setCustomerId(query.getCustomerId());
         q.setProductType(query.getProductType());
         q.setProductName(query.getProductName());
@@ -52,8 +52,8 @@ public class PolicyApplicationService {
         return PageResult.of(list);
     }
 
-    public PolicyApplication getById(String applicationId) {
-        return mapper.selectById(applicationId);
+    public PolicyApplication getById(String profileId) {
+        return mapper.selectById(profileId);
     }
 
     /** 投保申请 + 核保决策结果 关联分页查询。 */
@@ -66,9 +66,9 @@ public class PolicyApplicationService {
     }
 
     /** 投保申请与核保决策结果关联查询。 */
-    public Map<String, Object> getWithDecision(String applicationId) {
-        PolicyApplication application = mapper.selectById(applicationId);
-        UnderwritingDecision decision = decisionMapper.selectByApplicationId(applicationId);
+    public Map<String, Object> getWithDecision(String profileId) {
+        PolicyApplication application = mapper.selectById(profileId);
+        UnderwritingDecision decision = decisionMapper.selectByApplicationId(profileId);
         Map<String, Object> result = new HashMap<>();
         result.put("application", application);
         result.put("decision", decision);
@@ -76,8 +76,8 @@ public class PolicyApplicationService {
     }
 
     public PolicyApplication create(PolicyApplication entity) {
-        if (entity.getApplicationId() == null || entity.getApplicationId().isEmpty()) {
-            entity.setApplicationId(UUID.randomUUID().toString().replace("-", ""));
+        if (entity.getProfileId() == null || entity.getProfileId().isEmpty()) {
+            entity.setProfileId(UUID.randomUUID().toString().replace("-", ""));
         }
         LocalDateTime now = LocalDateTime.now();
         if (entity.getCreatedAt() == null) entity.setCreatedAt(now);
@@ -91,10 +91,10 @@ public class PolicyApplicationService {
     public PolicyApplication update(PolicyApplication entity) {
         entity.setUpdatedAt(LocalDateTime.now());
         mapper.updateById(entity);
-        return mapper.selectById(entity.getApplicationId());
+        return mapper.selectById(entity.getProfileId());
     }
 
-    public int delete(String applicationId) {
-        return mapper.deleteById(applicationId);
+    public int delete(String profileId) {
+        return mapper.deleteById(profileId);
     }
 }

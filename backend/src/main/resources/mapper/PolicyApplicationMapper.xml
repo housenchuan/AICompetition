@@ -4,7 +4,7 @@
 <mapper namespace="com.aicompetition.mapper.PolicyApplicationMapper">
 
     <sql id="Base_Columns">
-        application_id, customer_id, product_type, product_name, coverage_amount,
+        profile_id, customer_id, product_type, product_name, coverage_amount,
         premium, payment_frequency, insurance_period, waiting_period,
         beneficiary_relationship, application_date, status, created_by,
         created_at, updated_at
@@ -12,12 +12,12 @@
 
     <insert id="insert" parameterType="com.aicompetition.entity.PolicyApplication">
         INSERT INTO policy_applications (
-            application_id, customer_id, product_type, product_name, coverage_amount,
+            profile_id, customer_id, product_type, product_name, coverage_amount,
             premium, payment_frequency, insurance_period, waiting_period,
             beneficiary_relationship, application_date, status, created_by,
             created_at, updated_at
         ) VALUES (
-            #{applicationId}, #{customerId}, #{productType}, #{productName}, #{coverageAmount},
+            #{profileId}, #{customerId}, #{productType}, #{productName}, #{coverageAmount},
             #{premium}, #{paymentFrequency}, #{insurancePeriod}, #{waitingPeriod},
             #{beneficiaryRelationship}, #{applicationDate}, #{status}, #{createdBy},
             #{createdAt}, #{updatedAt}
@@ -41,17 +41,17 @@
             <if test="createdBy != null">created_by = #{createdBy},</if>
             <if test="updatedAt != null">updated_at = #{updatedAt},</if>
         </set>
-        WHERE application_id = #{applicationId}
+        WHERE profile_id = #{profileId}
     </update>
 
     <delete id="deleteById">
-        DELETE FROM policy_applications WHERE application_id = #{applicationId}
+        DELETE FROM policy_applications WHERE profile_id = #{profileId}
     </delete>
 
     <select id="selectById" resultType="com.aicompetition.entity.PolicyApplication">
         SELECT <include refid="Base_Columns"/>
         FROM policy_applications
-        WHERE application_id = #{applicationId}
+        WHERE profile_id = #{profileId}
     </select>
 
     <select id="selectList" resultType="com.aicompetition.entity.PolicyApplication">
@@ -59,7 +59,7 @@
         FROM policy_applications
         <where>
             <if test="q != null">
-                <if test="q.applicationId != null and q.applicationId != ''">AND application_id = #{q.applicationId}</if>
+                <if test="q.profileId != null and q.profileId != ''">AND profile_id = #{q.profileId}</if>
                 <if test="q.customerId != null and q.customerId != ''">AND customer_id = #{q.customerId}</if>
                 <if test="q.productType != null and q.productType != ''">AND product_type = #{q.productType}</if>
                 <if test="q.productName != null and q.productName != ''">AND product_name = #{q.productName}</if>
@@ -74,20 +74,20 @@
             <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
             <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
         </where>
-        ORDER BY updated_at DESC NULLS LAST, application_id
+        ORDER BY updated_at DESC NULLS LAST, profile_id
     </select>
 
     <!-- 投保申请 + 核保决策结果 关联分页查询（LEFT JOIN） -->
     <select id="selectListWithDecision" resultType="com.aicompetition.dto.ApplicationDecisionVO">
         SELECT
-            pa.application_id, pa.customer_id, pa.product_type, pa.product_name, pa.coverage_amount,
+            pa.profile_id, pa.customer_id, pa.product_type, pa.product_name, pa.coverage_amount,
             pa.premium, pa.payment_frequency, pa.insurance_period, pa.waiting_period,
             pa.beneficiary_relationship, pa.application_date, pa.status, pa.created_by,
             pa.created_at, pa.updated_at,
             ud.decision_id, ud.risk_score, ud.risk_level, ud.underwriting_result,
             ud.premium_adjustment, ud.key_factors
         FROM policy_applications pa
-        LEFT JOIN underwriting_decisions ud ON ud.application_id = pa.application_id
+        LEFT JOIN underwriting_decisions ud ON ud.application_id = pa.profile_id
         <where>
             <if test="q != null">
                 <if test="q.customerId != null and q.customerId != ''">AND pa.customer_id = #{q.customerId}</if>
@@ -101,6 +101,6 @@
             <if test="dateFrom != null">AND pa.application_date &gt;= #{dateFrom}</if>
             <if test="dateTo != null">AND pa.application_date &lt;= #{dateTo}</if>
         </where>
-        ORDER BY pa.updated_at DESC NULLS LAST, pa.application_id
+        ORDER BY pa.updated_at DESC NULLS LAST, pa.profile_id
     </select>
 </mapper>
