@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 核保预测服务：规则引擎给出确定性评分/等级/结论/加费，
@@ -74,15 +75,48 @@ public class PredictService {
 
     private String buildFactors(ScoreResult r, UnderwritingDecision d) {
         String ruleFactors = r.getKeyFactors().isEmpty() ? "无显著风险因素" : String.join("；", r.getKeyFactors());
-        if (!useLlm) {
-            return ruleFactors;
+        String summary = ruleFactors;
+        if (useLlm) {
+            try {
+                summary = llmFactors(r, d, ruleFactors);
+            } catch (Exception e) {
+                log.warn("LLM 关键因子生成失败，降级为规则拆解：{}", e.getMessage());
+            }
         }
-        try {
-            return llmFactors(r, d, ruleFactors);
-        } catch (Exception e) {
-            log.warn("LLM 关键因子生成失败，降级为规则拆解：{}", e.getMessage());
-            return ruleFactors;
+        String breakdown = buildBreakdown(r, d);
+        return breakdown.isEmpty() ? summary : breakdown + " ｜ " + summary;
+    }
+
+    /** 各维度加分明细：只列分值>0 的维度，按分值降序，BMI 带原始值。拒保时不列。 */
+    private String buildBreakdown(ScoreResult r, UnderwritingDecision d) {
+        if (r.isRejected()) return "";
+        List<Map.Entry<String, Integer>> items = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : r.getBreakdown().entrySet()) {
+            if (e.getValue() != null && e.getValue() > 0) items.add(e);
         }
+        items.sort((a, b) -> b.getValue() - a.getValue());
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Integer> e : items) {
+            if (sb.length() > 0) sb.append("、");
+            sb.append(dimLabel(e.getKey(), d)).append("(+").append(e.getValue()).append(")");
+        }
+        return sb.toString();
+    }
+
+    /** 把 breakdown 的 key 归一成简洁维度名；BMI 带原始值。 */
+    private String dimLabel(String key, UnderwritingDecision d) {
+        if (key.startsWith("BMI")) {
+            String v = d.getBmi() == null ? "" : d.getBmi().stripTrailingZeros().toPlainString();
+            return "BMI" + v;
+        }
+        if (key.startsWith("血压")) return "血压";
+        if (key.startsWith("吸烟")) return "吸烟";
+        if (key.startsWith("饮酒")) return "饮酒";
+        if (key.startsWith("年龄")) return "年龄";
+        if (key.startsWith("职业")) return "职业";
+        if (key.startsWith("家族")) return "家族史";
+        if (key.startsWith("个人病史")) return "病史";
+        return key;
     }
 
     private String llmFactors(ScoreResult r, UnderwritingDecision d, String ruleFactors) {
