@@ -23,20 +23,36 @@ public class RiskScoreEngine {
         this.ruleService = ruleService;
     }
 
+    /** 便捷入口：无历史拒保上下文（如 preview 试算）。 */
     public ScoreResult compute(UnderwritingDecision in) {
+        return compute(in, false);
+    }
+
+    /**
+     * @param hasRecentRejection 近6个月内该客户是否曾有拒保记录（跨表事实，由 PredictService 查得后传入，
+     *                           引擎不做 I/O，仅按事实做确定性判定）。
+     */
+    public ScoreResult compute(UnderwritingDecision in, boolean hasRecentRejection) {
         ScoreResult r = new ScoreResult();
 
-        // 直接拒保：个人病史命中重度异常疾病
+        // 直接拒保①：近6个月内曾有拒保记录
+        JsonNode recentReject = ruleService.section("recentRejectionReject");
+        if (hasRecentRejection && recentReject != null && recentReject.path("reject").asBoolean(false)) {
+            return reject(r, recentReject.path("factor").asText("近6个月内曾有拒保记录（直接拒保）"));
+        }
+
+        // 直接拒保②：饮酒状况含「瘾」字（酒精成瘾）；受控词表正常值 是/否/偶尔 不含「瘾」，无误判
+        JsonNode drinkingReject = ruleService.section("drinkingReject");
+        if (drinkingReject != null && drinkingReject.path("reject").asBoolean(false)
+                && safe(in.getDrinkingStatus()).contains(drinkingReject.path("keyword").asText("瘾"))) {
+            return reject(r, drinkingReject.path("factor").asText("酒精成瘾（直接拒保）"));
+        }
+
+        // 直接拒保③：个人病史命中重度异常疾病
         String personal = safe(in.getPersonalMedicalHistory());
         for (JsonNode rule : ruleService.section("personalHistory")) {
             if (rule.path("reject").asBoolean(false) && containsAny(personal, rule.get("diseases"))) {
-                r.setRejected(true);
-                r.addFactor("个人病史重度异常（直接拒保）");
-                r.setRiskLevel("拒保体");
-                r.setUnderwritingResult("拒保");
-                r.setPremiumAdjustment(BigDecimal.ONE);
-                r.setTotalScore(0);
-                return r;
+                return reject(r, "个人病史重度异常（直接拒保）");
             }
         }
 
@@ -52,6 +68,17 @@ public class RiskScoreEngine {
 
         r.setTotalScore(total);
         classify(total, r);
+        return r;
+    }
+
+    /** 统一构造「直接拒保」结果：拒保体、总分0、加费系数1、附拒保因子。 */
+    private ScoreResult reject(ScoreResult r, String factor) {
+        r.setRejected(true);
+        r.addFactor(factor);
+        r.setRiskLevel("拒保体");
+        r.setUnderwritingResult("拒保");
+        r.setPremiumAdjustment(BigDecimal.ONE);
+        r.setTotalScore(0);
         return r;
     }
 

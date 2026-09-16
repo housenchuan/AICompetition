@@ -54,6 +54,16 @@
         WHERE profile_id = #{profileId}
     </select>
 
+    <select id="countRecentRejections" resultType="int">
+        SELECT COUNT(*)
+        FROM policy_applications
+        WHERE customer_id = #{customerId}
+          AND status = #{status}
+          AND profile_id != #{excludeProfileId}
+          AND application_date &gt;= #{dateFrom}
+          AND application_date &lt;= #{dateTo}
+    </select>
+
     <select id="selectList" resultType="com.aicompetition.entity.PolicyApplication">
         SELECT <include refid="Base_Columns"/>
         FROM policy_applications

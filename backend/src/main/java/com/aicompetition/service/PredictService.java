@@ -1,15 +1,19 @@
 package com.aicompetition.service;
 
 import com.aicompetition.dto.ScoreResult;
+import com.aicompetition.entity.PolicyApplication;
 import com.aicompetition.entity.UnderwritingDecision;
 import com.aicompetition.entity.ai.ChatMessage;
 import com.aicompetition.entity.ai.ChatResponse;
+import com.aicompetition.mapper.PolicyApplicationMapper;
 import com.aicompetition.mapper.UnderwritingDecisionMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,14 +30,20 @@ public class PredictService {
 
     private final RiskScoreEngine engine;
     private final UnderwritingDecisionMapper decisionMapper;
+    private final PolicyApplicationMapper policyApplicationMapper;
+    private final RuleService ruleService;
     private final AiService aiService;
 
     @Value("${ai.predict.use-llm:true}")
     private boolean useLlm;
 
-    public PredictService(RiskScoreEngine engine, UnderwritingDecisionMapper decisionMapper, AiService aiService) {
+    public PredictService(RiskScoreEngine engine, UnderwritingDecisionMapper decisionMapper,
+                          PolicyApplicationMapper policyApplicationMapper, RuleService ruleService,
+                          AiService aiService) {
         this.engine = engine;
         this.decisionMapper = decisionMapper;
+        this.policyApplicationMapper = policyApplicationMapper;
+        this.ruleService = ruleService;
         this.aiService = aiService;
     }
 
@@ -48,7 +58,7 @@ public class PredictService {
         if (d == null) {
             throw new IllegalArgumentException("核保决策记录不存在：" + decisionId);
         }
-        ScoreResult r = engine.compute(d);
+        ScoreResult r = engine.compute(d, hasRecentRejection(d));
         d.setRiskScore(r.getTotalScore());
         d.setRiskLevel(r.getRiskLevel());
         d.setUnderwritingResult(r.getUnderwritingResult());
@@ -57,6 +67,23 @@ public class PredictService {
         d.setUpdatedAt(LocalDateTime.now());
         decisionMapper.updatePrediction(d);
         return decisionMapper.selectById(decisionId);
+    }
+
+    /**
+     * 方案A：同一投保人在当前申请日前 N 个月内是否有 status='已拒保' 的其它申请（排除当前申请）。
+     * 参照日取当前申请的 application_date（绝不用 now()，数据为历史数据）；取不到参照日则跳过（视为无）。
+     */
+    private boolean hasRecentRejection(UnderwritingDecision d) {
+        if (d.getApplicationId() == null || d.getCustomerId() == null) return false;
+        JsonNode cfg = ruleService.section("recentRejectionReject");
+        if (cfg == null || !cfg.path("reject").asBoolean(false)) return false;
+        PolicyApplication cur = policyApplicationMapper.selectById(d.getApplicationId());
+        if (cur == null || cur.getApplicationDate() == null) return false;
+        LocalDate refDate = cur.getApplicationDate();
+        LocalDate from = refDate.minusMonths(cfg.path("months").asInt(6));
+        int cnt = policyApplicationMapper.countRecentRejections(
+                d.getCustomerId(), cfg.path("status").asText("已拒保"), from, refDate, d.getApplicationId());
+        return cnt > 0;
     }
 
     /** 批量预测。 */

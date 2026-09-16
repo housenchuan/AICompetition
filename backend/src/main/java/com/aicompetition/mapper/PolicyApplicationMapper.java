@@ -40,4 +40,14 @@ public interface PolicyApplicationMapper {
     List<ApplicationDecisionVO> selectListWithDecision(@Param("q") PolicyApplicationQuery q,
                                                        @Param("dateFrom") LocalDate dateFrom,
                                                        @Param("dateTo") LocalDate dateTo);
+
+    /**
+     * 统计某投保人在 [dateFrom, dateTo) 内、状态为 status 的其它申请数（排除 excludeProfileId 当前申请）。
+     * 用于「近N个月内曾有拒保记录 → 直接拒保」判定。
+     */
+    int countRecentRejections(@Param("customerId") String customerId,
+                              @Param("status") String status,
+                              @Param("dateFrom") LocalDate dateFrom,
+                              @Param("dateTo") LocalDate dateTo,
+                              @Param("excludeProfileId") String excludeProfileId);
 }
