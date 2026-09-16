@@ -1,0 +1,99 @@
+<svg width="100%" viewBox="0 0 680 900" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>核保预测流程图</title>
+<desc>从前端 predictApi 到规则引擎计分、分级、落库与 LLM 关键因子增强的完整流程，含拒保短路、preview 试算不落库、use-llm 降级三处分支。</desc>
+<style>
+.t{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;fill:#2C2C2A}
+.th{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;font-weight:500;fill:#2C2C2A}
+.ts{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:12px;fill:#5F5E5A}
+.arr{stroke:#888780;stroke-width:1.5;fill:none;marker-end:url(#ah)}
+.gray rect{fill:#F1EFE8;stroke:#5F5E5A}
+.teal rect{fill:#E1F5EE;stroke:#0F6E56}
+.amber rect{fill:#FAEEDA;stroke:#854F0B}
+.red rect{fill:#FCEBEB;stroke:#A32D2D}
+.purple rect{fill:#EEEDFE;stroke:#534AB7}
+.teal .th,.teal .ts{fill:#085041}.amber .th{fill:#633806}.red .th,.red .ts{fill:#791F1F}
+.purple .th,.purple .ts{fill:#3C3489}.gray .th,.gray .ts{fill:#2C2C2A}
+</style>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1,1 L8,5 L1,9" fill="none" stroke="#888780" stroke-width="1.5"/></marker></defs>
+
+<g class="gray"><rect x="110" y="40" width="240" height="50" rx="8"/>
+<text class="th" x="230" y="66" text-anchor="middle">前端 predictApi</text>
+<text class="ts" x="230" y="82" text-anchor="middle">preview · single · batch</text></g>
+<line class="arr" x1="230" y1="90" x2="230" y2="110"/>
+
+<g class="gray"><rect x="110" y="112" width="240" height="46" rx="8"/>
+<text class="th" x="230" y="136" text-anchor="middle">PredictService</text>
+<text class="ts" x="230" y="152" text-anchor="middle">controller 转发 · 编排</text></g>
+<line class="arr" x1="230" y1="158" x2="230" y2="178"/>
+
+<g class="teal"><rect x="110" y="180" width="240" height="46" rx="8"/>
+<text class="th" x="230" y="204" text-anchor="middle">RiskScoreEngine.compute</text>
+<text class="ts" x="230" y="220" text-anchor="middle">确定性计分</text></g>
+<line class="arr" x1="230" y1="226" x2="230" y2="246"/>
+
+<g class="amber"><rect x="110" y="248" width="240" height="46" rx="8"/>
+<text class="th" x="230" y="276" text-anchor="middle">个人病史命中拒保疾病?</text></g>
+<line class="arr" x1="350" y1="271" x2="388" y2="271"/>
+<text class="ts" x="366" y="264" text-anchor="middle">是</text>
+<g class="red"><rect x="390" y="245" width="240" height="50" rx="8"/>
+<text class="th" x="510" y="267" text-anchor="middle">拒保体 · 总分 0</text>
+<text class="ts" x="510" y="283" text-anchor="middle">直接返回，不累计</text></g>
+<text class="ts" x="242" y="310" text-anchor="middle">否</text>
+<line class="arr" x1="230" y1="294" x2="230" y2="316"/>
+
+<g class="teal"><rect x="110" y="318" width="240" height="50" rx="8"/>
+<text class="th" x="230" y="342" text-anchor="middle">八维累加评分</text>
+<text class="ts" x="230" y="358" text-anchor="middle">8 维度读 risk-rules.json</text></g>
+<line class="arr" x1="230" y1="368" x2="230" y2="388"/>
+
+<g class="teal"><rect x="110" y="390" width="240" height="50" rx="8"/>
+<text class="th" x="230" y="414" text-anchor="middle">classify 分级</text>
+<text class="ts" x="230" y="430" text-anchor="middle">分 5 级 + 加费系数</text></g>
+<line class="arr" x1="230" y1="440" x2="230" y2="460"/>
+
+<g class="amber"><rect x="110" y="462" width="240" height="46" rx="8"/>
+<text class="th" x="230" y="490" text-anchor="middle">调用入口是 preview?</text></g>
+<line class="arr" x1="350" y1="485" x2="388" y2="485"/>
+<text class="ts" x="366" y="478" text-anchor="middle">是</text>
+<g class="gray"><rect x="390" y="459" width="240" height="52" rx="8"/>
+<text class="th" x="510" y="481" text-anchor="middle">返回 ScoreResult</text>
+<text class="ts" x="510" y="497" text-anchor="middle">不落库 · 结束</text></g>
+<text class="ts" x="270" y="526" text-anchor="middle">否 · single / batch</text>
+<line class="arr" x1="230" y1="508" x2="230" y2="530"/>
+
+<g class="gray"><rect x="110" y="532" width="240" height="50" rx="8"/>
+<text class="th" x="230" y="556" text-anchor="middle">回写 5 字段</text>
+<text class="ts" x="230" y="572" text-anchor="middle">updatePrediction 落库</text></g>
+<line class="arr" x1="230" y1="582" x2="230" y2="602"/>
+
+<g class="amber"><rect x="110" y="604" width="240" height="46" rx="8"/>
+<text class="th" x="230" y="632" text-anchor="middle">use-llm 开关开启?</text></g>
+<line class="arr" x1="200" y1="650" x2="180" y2="688"/>
+<line class="arr" x1="260" y1="650" x2="410" y2="688"/>
+<text class="ts" x="140" y="676" text-anchor="middle">false</text>
+<text class="ts" x="360" y="676" text-anchor="middle">true</text>
+
+<g class="gray"><rect x="90" y="690" width="180" height="50" rx="8"/>
+<text class="th" x="180" y="714" text-anchor="middle">规则因子拼接</text>
+<text class="ts" x="180" y="730" text-anchor="middle">；分隔兜底</text></g>
+<g class="purple"><rect x="320" y="690" width="180" height="50" rx="8"/>
+<text class="th" x="410" y="714" text-anchor="middle">LLM 一句话概括</text>
+<text class="ts" x="410" y="730" text-anchor="middle">超时/异常降级</text></g>
+<line class="arr" x1="180" y1="740" x2="222" y2="788"/>
+<line class="arr" x1="410" y1="740" x2="248" y2="788"/>
+
+<g class="teal"><rect x="110" y="790" width="240" height="48" rx="8"/>
+<text class="th" x="230" y="812" text-anchor="middle">写入 key_factors</text>
+<text class="ts" x="230" y="828" text-anchor="middle">决策字段一并落库</text></g>
+
+<rect class="teal" x="60" y="858" width="14" height="14" rx="3" style="fill:#E1F5EE;stroke:#0F6E56"/>
+<text class="ts" x="80" y="869">计分</text>
+<rect x="140" y="858" width="14" height="14" rx="3" style="fill:#FAEEDA;stroke:#854F0B"/>
+<text class="ts" x="160" y="869">判断</text>
+<rect x="222" y="858" width="14" height="14" rx="3" style="fill:#F1EFE8;stroke:#5F5E5A"/>
+<text class="ts" x="242" y="869">I/O · 落库</text>
+<rect x="360" y="858" width="14" height="14" rx="3" style="fill:#FCEBEB;stroke:#A32D2D"/>
+<text class="ts" x="380" y="869">拒保</text>
+<rect x="440" y="858" width="14" height="14" rx="3" style="fill:#EEEDFE;stroke:#534AB7"/>
+<text class="ts" x="460" y="869">LLM 增强</text>
+</svg>

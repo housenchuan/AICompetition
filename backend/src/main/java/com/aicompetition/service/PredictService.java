@@ -27,7 +27,7 @@ public class PredictService {
     private final UnderwritingDecisionMapper decisionMapper;
     private final AiService aiService;
 
-    @Value("${ai.predict.use-llm:false}")
+    @Value("${ai.predict.use-llm:true}")
     private boolean useLlm;
 
     public PredictService(RiskScoreEngine engine, UnderwritingDecisionMapper decisionMapper, AiService aiService) {
