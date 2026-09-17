@@ -60,6 +60,7 @@
             underwriting_result = #{underwritingResult},
             premium_adjustment = #{premiumAdjustment},
             key_factors        = #{keyFactors},
+            created_at         = #{createdAt},
             updated_at         = #{updatedAt}
         WHERE decision_id = #{decisionId}
     </update>

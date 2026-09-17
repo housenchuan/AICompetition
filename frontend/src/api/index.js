@@ -27,7 +27,11 @@ export const decisionApi = {
   byApplication: (id) => request.post(`/api/decisions/by-application/${id}`),
   create: (data) => request.post('/api/decisions/create', data),
   update: (id, data) => request.post(`/api/decisions/update/${id}`, data),
-  remove: (id) => request.post(`/api/decisions/delete/${id}`)
+  remove: (id) => request.post(`/api/decisions/delete/${id}`),
+  // 人工修整 / 分级审批 / 审计留痕
+  adjust: (id, data) => request.post(`/api/decisions/adjust/${id}`, data),
+  review: (id, data) => request.post(`/api/decisions/adjust/${id}/review`, data),
+  audit: (id) => request.post(`/api/decisions/adjust/${id}/audit`)
 }
 
 // 风险计分规则 + 规则引擎

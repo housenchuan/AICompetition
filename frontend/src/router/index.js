@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '../layout/MainLayout.vue'
+import { canAccess } from '../roles'
 
 const routes = [
   {
@@ -24,6 +25,13 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// 页面级权限拦截：当前角色无权访问的页面重定向到首页
+router.beforeEach((to) => {
+  if (to.path === '/home' || to.path === '/') return true
+  if (!canAccess(to.path)) return '/home'
+  return true
 })
 
 export default router

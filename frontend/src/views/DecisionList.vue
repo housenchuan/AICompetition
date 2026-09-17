@@ -104,10 +104,13 @@
         <el-table-column prop="createdBy" label="创建人" min-width="90" />
         <el-table-column prop="createdAt" label="创建时间" min-width="160" />
         <el-table-column prop="updatedAt" label="更新时间" min-width="160" />
-        <el-table-column label="操作" width="132" fixed="right">
+        <el-table-column label="操作" width="210" fixed="right">
           <template #default="{ row }">
+            <el-tag v-if="row.adjustStatus === '待审批'" type="warning" size="small" effect="plain" style="margin-right:6px">待审批</el-tag>
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>
             <el-button link type="warning" :loading="predictingId === row.decisionId" :disabled="batchRunning" @click="doPredictOne(row)">预测</el-button>
+            <el-button v-if="canAdjust" link type="success" :disabled="row.riskLevel == null || row.adjustStatus === '待审批'"
+              @click="openAdjust(row)">人工修整</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -173,7 +176,97 @@
             <el-descriptions-item label="加费比例">{{ detailDec.premiumAdjustment ?? '—' }}</el-descriptions-item>
             <el-descriptions-item label="关键风险因子" :span="2">{{ detailDec.keyFactors ?? '待预测' }}</el-descriptions-item>
           </el-descriptions>
+
+          <!-- 人工修整 · 审计留痕 / 分级审批 -->
+          <template v-if="audit && (audit.records?.length || audit.aiBaseline)">
+            <div class="sec-title" style="margin-top:16px">人工修整审计</div>
+
+            <!-- 待审批：核保主管可对比 AI vs 人工 并审批 -->
+            <div v-if="pendingRecord" class="review-box">
+              <div class="review-hd">
+                <span>本条修整待审批</span>
+                <el-tag size="small" type="warning">审批路径：核保主管（二级审批）</el-tag>
+              </div>
+              <el-table :data="compareRows(pendingRecord)" border size="small" class="cmp-table">
+                <el-table-column prop="label" label="字段" width="110" />
+                <el-table-column prop="ai" label="AI 预测值" />
+                <el-table-column label="人工修改值">
+                  <template #default="{ row }">
+                    <span :class="{ diff: row.changed }">{{ row.human }}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <div class="review-reason">修整原因：{{ pendingRecord.reason }}　·　提交人：{{ pendingRecord.submitRole }}</div>
+              <div v-if="canReview" class="review-act">
+                <el-input v-model="reviewComment" type="textarea" :rows="2" placeholder="审批意见（可选）" style="margin-bottom:10px" />
+                <el-button type="success" :loading="reviewing" @click="doReview(true)">✓ 审批通过</el-button>
+                <el-button type="danger" plain :loading="reviewing" @click="doReview(false)">✗ 驳回</el-button>
+              </div>
+              <div v-else class="muted" style="margin-top:8px">仅核保主管可审批</div>
+            </div>
+
+            <!-- 时间线：AI 核保 → 人工提交 → 审批结果 -->
+            <div class="timeline">
+              <div class="tl-item">
+                <b>AI 自动核保 · 规则引擎</b>
+                <span class="tl-time">{{ detailDec.createdAt }}</span>
+                <div v-if="audit.aiBaseline" class="tl-body">
+                  结论 {{ audit.aiBaseline.underwritingResult }} / {{ audit.aiBaseline.riskLevel }} / 加费{{ pct(audit.aiBaseline.premiumAdjustment) }} / 评分{{ audit.aiBaseline.riskScore }}
+                </div>
+              </div>
+              <div v-for="(rec, i) in (audit.records || [])" :key="i" class="tl-item">
+                <b>人工修整 · {{ rec.submitRole }}</b>
+                <el-tag size="small" :type="adjustTagType(statusTag(rec.status))" style="margin-left:6px">{{ rec.status }}</el-tag>
+                <span class="tl-time">{{ rec.submitAt }}</span>
+                <div class="tl-body">
+                  {{ recSummary(rec) }}<br />原因：{{ rec.reason }}
+                  <template v-if="rec.reviewAt"><br />审批：{{ rec.reviewRole }} · {{ rec.reviewAt }}<span v-if="rec.reviewComment"> · {{ rec.reviewComment }}</span></template>
+                </div>
+              </div>
+            </div>
+          </template>
         </template>
+      </template>
+    </el-dialog>
+
+    <!-- 人工修整弹窗 -->
+    <el-dialog v-model="adjustVisible" :title="`人工修整 · ${adjustRow?.customerId || ''}`" width="620px">
+      <div v-if="adjustRow" class="adjust-cur">
+        <span>当前结论</span>
+        <b>{{ adjustRow.underwritingResult }}</b>
+        <el-tag :type="riskType(adjustRow.riskLevel)" size="small">{{ adjustRow.riskLevel }}</el-tag>
+        <span>· 加费 {{ pct(adjustRow.premiumAdjustment) }} · 评分 {{ adjustRow.riskScore }}</span>
+      </div>
+      <el-form :model="adjustForm" label-width="96px" class="adjust-form">
+        <el-form-item label="核保结论">
+          <el-select v-model="adjustForm.underwritingResult" style="width:100%" @change="onResultChange">
+            <el-option v-for="r in RESULT_OPTS" :key="r" :label="r" :value="r" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="风险等级">
+          <el-select v-model="adjustForm.riskLevel" style="width:100%">
+            <el-option v-for="l in LEVEL_OPTS" :key="l" :label="l" :value="l" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="加费比例(%)">
+          <el-input-number v-model="adjustForm.premiumPct" :min="0" :max="300" :step="5" :disabled="zeroPremium"
+            controls-position="right" style="width:180px" />
+          <span v-if="zeroPremium" class="muted" style="margin-left:10px">拒保/延期自动归零</span>
+        </el-form-item>
+        <el-form-item label="风险评分">
+          <el-input-number v-model="adjustForm.riskScore" :min="0" :max="999" controls-position="right" style="width:180px" />
+        </el-form-item>
+        <el-form-item label="修整原因" required>
+          <el-input v-model="adjustForm.reason" type="textarea" :rows="3"
+            placeholder="必填：请说明人工修整依据（复核材料 / 规则例外 / 客户申诉等）" />
+        </el-form-item>
+      </el-form>
+      <div class="adjust-path">审批路径：核保主管（二级审批）· {{ isSupervisor ? '当前为核保主管，提交即生效' : '提交后进入待审批' }}</div>
+      <template #footer>
+        <el-button @click="adjustVisible = false">取消</el-button>
+        <el-button type="primary" :loading="adjustSaving" @click="submitAdjust">
+          {{ isSupervisor ? '提交（直接生效）' : '提交（待审批）' }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -195,6 +288,22 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { decisionApi, predictApi, applicationApi } from '../api'
+import { currentRole } from '../roles'
+
+// 角色权限：核保专员/核保主管可发起修整；仅核保主管可审批；管理员只读
+const role = computed(() => currentRole())
+const roleName = computed(() => role.value.name)
+const isSupervisor = computed(() => roleName.value === '核保主管')
+const canAdjust = computed(() => ['核保专员', '核保主管'].includes(roleName.value))
+const canReview = computed(() => roleName.value === '核保主管')
+
+// 覆写下拉选项（与规则 levels 的 result/level 一致）
+const RESULT_OPTS = ['标保（标准费率承保）', '加费承保（加费10%~20%）', '加费承保（加费20%~50%）或除外责任', '延期承保并加费50%以上', '拒保']
+const LEVEL_OPTS = ['标准体', '次标体A级', '次标体B级', '高风险体', '拒保体']
+
+function pct(coeff) { if (coeff == null) return '—'; return Math.round((Number(coeff) - 1) * 100) + '%' }
+function adjustTagType(s) { return { '待审批': 'warning', '已生效': 'success', '已驳回': 'info' }[s] || 'info' }
+function statusTag(s) { if (s === '待审批') return '待审批'; if (s === '已通过' || s === '已生效') return '已生效'; if (s === '已驳回') return '已驳回'; return '' }
 
 const rows = ref([])
 const total = ref(0)
@@ -296,7 +405,9 @@ async function openDetail(row) {
   const res = await applicationApi.withDecision(row.applicationId)
   detailApp.value = res.data.application
   detailDec.value = res.data.decision
+  audit.value = null
   detailVisible.value = true
+  if (detailDec.value?.decisionId) loadAudit(detailDec.value.decisionId)
 }
 
 function onSelect(rows) { selected.value = rows }
@@ -339,6 +450,81 @@ async function doPredictBatch() {
   }, 600)
 }
 
+// ===== 人工修整 =====
+const adjustVisible = ref(false)
+const adjustRow = ref(null)
+const adjustSaving = ref(false)
+const adjustForm = reactive({ underwritingResult: '', riskLevel: '', premiumPct: 0, riskScore: 0, reason: '' })
+const zeroPremium = computed(() => /拒保|延期/.test(adjustForm.underwritingResult))
+
+function onResultChange() { if (zeroPremium.value) adjustForm.premiumPct = 0 }
+
+function openAdjust(row) {
+  adjustRow.value = row
+  adjustForm.underwritingResult = row.underwritingResult || ''
+  adjustForm.riskLevel = row.riskLevel || ''
+  adjustForm.premiumPct = row.premiumAdjustment != null ? Math.round((Number(row.premiumAdjustment) - 1) * 100) : 0
+  adjustForm.riskScore = row.riskScore ?? 0
+  adjustForm.reason = ''
+  adjustVisible.value = true
+}
+
+async function submitAdjust() {
+  if (!adjustForm.reason.trim()) { ElMessage.warning('修整原因必填'); return }
+  adjustSaving.value = true
+  try {
+    const premiumAdjustment = zeroPremium.value ? 1 : Number((1 + adjustForm.premiumPct / 100).toFixed(2))
+    await decisionApi.adjust(adjustRow.value.decisionId, {
+      underwritingResult: adjustForm.underwritingResult,
+      riskLevel: adjustForm.riskLevel,
+      premiumAdjustment,
+      riskScore: adjustForm.riskScore,
+      reason: adjustForm.reason.trim(),
+      role: roleName.value
+    })
+    ElMessage.success(isSupervisor.value ? '修整已提交并直接生效' : '修整已提交，待核保主管审批')
+    adjustVisible.value = false
+    await load()
+  } catch (e) { /* 拦截器已提示 */ } finally {
+    adjustSaving.value = false
+  }
+}
+
+// ===== 审计留痕 / 审批 =====
+const audit = ref(null)
+const reviewComment = ref('')
+const reviewing = ref(false)
+const pendingRecord = computed(() => (audit.value?.records || []).find(r => r.status === '待审批') || null)
+
+function compareRows(rec) {
+  const ai = rec.aiPrediction || {}, h = rec.humanValue || {}
+  return [
+    { label: '核保结论', ai: ai.underwritingResult, human: h.underwritingResult, changed: ai.underwritingResult !== h.underwritingResult },
+    { label: '风险等级', ai: ai.riskLevel, human: h.riskLevel, changed: ai.riskLevel !== h.riskLevel },
+    { label: '加费比例', ai: pct(ai.premiumAdjustment), human: pct(h.premiumAdjustment), changed: Number(ai.premiumAdjustment) !== Number(h.premiumAdjustment) },
+    { label: '风险评分', ai: ai.riskScore, human: h.riskScore, changed: ai.riskScore !== h.riskScore }
+  ]
+}
+function recSummary(rec) {
+  const h = rec.humanValue || {}
+  return `→ ${h.underwritingResult} / ${h.riskLevel} / 加费${pct(h.premiumAdjustment)} / 评分${h.riskScore}`
+}
+async function loadAudit(decisionId) {
+  try { const res = await decisionApi.audit(decisionId); audit.value = res.data } catch (e) { audit.value = null }
+}
+async function doReview(pass) {
+  reviewing.value = true
+  try {
+    await decisionApi.review(detailDec.value.decisionId, { pass, comment: reviewComment.value, role: roleName.value })
+    ElMessage.success(pass ? '审批通过，已覆写生效' : '已驳回')
+    reviewComment.value = ''
+    await loadAudit(detailDec.value.decisionId)
+    await load()
+  } catch (e) { /* 拦截器已提示 */ } finally {
+    reviewing.value = false
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -351,6 +537,20 @@ onMounted(load)
 .score { color: var(--brand); font-weight: 600; }
 .sec-title { font-size: 13px; font-weight: 600; color: #1f2329; margin: 6px 0 12px; padding-left: 8px; border-left: 3px solid var(--brand); }
 .ai-desc { margin-top: 10px; }
+.review-box { border: 1px solid #ffe0b2; background: #fffdf5; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+.review-hd { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; color: #1f2329; margin-bottom: 10px; }
+.cmp-table { margin-bottom: 10px; }
+.cmp-table .diff { color: #f56c6c; font-weight: 600; }
+.review-reason { font-size: 12px; color: #6b7280; margin-bottom: 10px; }
+.timeline { padding: 6px 0 2px; }
+.tl-item { position: relative; padding: 0 0 14px 16px; border-left: 2px solid #eef0f3; }
+.tl-item::before { content: ''; position: absolute; left: -5px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+.tl-item:last-child { border-left-color: transparent; }
+.tl-time { font-size: 11px; color: #a0a4ab; margin-left: 8px; }
+.tl-body { font-size: 12px; color: #4a4f57; margin-top: 4px; line-height: 1.6; }
+.adjust-cur { font-size: 13px; color: #4a4f57; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.adjust-cur b { color: #1f2329; }
+.adjust-path { font-size: 12px; color: #8a8f99; margin-top: 4px; }
 .progress-box { padding: 6px 4px 10px; }
 .progress-text { margin-top: 14px; text-align: center; font-size: 13px; color: #4a4f57; }
 .progress-text .fail { color: #f56c6c; margin-left: 6px; }

@@ -32,6 +32,12 @@ public class UnderwritingDecision {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    /** 非持久化：人工修整状态标签（待审批/已生效/已驳回），由 AdjustmentService 合并填充，不入库。 */
+    private String adjustStatus;
+
+    public String getAdjustStatus() { return adjustStatus; }
+    public void setAdjustStatus(String adjustStatus) { this.adjustStatus = adjustStatus; }
+
     public String getDecisionId() { return decisionId; }
     public void setDecisionId(String decisionId) { this.decisionId = decisionId; }
 

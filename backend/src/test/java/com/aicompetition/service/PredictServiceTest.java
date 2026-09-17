@@ -33,7 +33,8 @@ class PredictServiceTest {
         decisionMapper = mock(UnderwritingDecisionMapper.class);
         policyApplicationMapper = mock(PolicyApplicationMapper.class);
         AiService aiService = mock(AiService.class);
-        service = new PredictService(engine, decisionMapper, policyApplicationMapper, ruleService, aiService);
+        AdjustmentService adjustmentService = mock(AdjustmentService.class);
+        service = new PredictService(engine, decisionMapper, policyApplicationMapper, ruleService, aiService, adjustmentService);
     }
 
     private UnderwritingDecision healthyDecision() {
@@ -81,5 +82,32 @@ class PredictServiceTest {
         service.predictOne("D999");
 
         assertNotEquals("拒保体", d.getRiskLevel());
+    }
+
+    @Test
+    void 创建时间为空_预测时补为当前时间() {
+        UnderwritingDecision d = healthyDecision();
+        d.setCreatedAt(null);
+        when(decisionMapper.selectById("D999")).thenReturn(d);
+        when(policyApplicationMapper.selectById("A999")).thenReturn(new PolicyApplication());
+        when(policyApplicationMapper.countRecentRejections(any(), any(), any(), any(), any())).thenReturn(0);
+
+        service.predictOne("D999");
+
+        assertNotNull(d.getCreatedAt());
+    }
+
+    @Test
+    void 创建时间已有_预测时保持不变() {
+        UnderwritingDecision d = healthyDecision();
+        java.time.LocalDateTime existing = java.time.LocalDateTime.of(2024, 1, 1, 10, 0);
+        d.setCreatedAt(existing);
+        when(decisionMapper.selectById("D999")).thenReturn(d);
+        when(policyApplicationMapper.selectById("A999")).thenReturn(new PolicyApplication());
+        when(policyApplicationMapper.countRecentRejections(any(), any(), any(), any(), any())).thenReturn(0);
+
+        service.predictOne("D999");
+
+        assertEquals(existing, d.getCreatedAt());
     }
 }

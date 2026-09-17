@@ -33,18 +33,20 @@ public class PredictService {
     private final PolicyApplicationMapper policyApplicationMapper;
     private final RuleService ruleService;
     private final AiService aiService;
+    private final AdjustmentService adjustmentService;
 
     @Value("${ai.predict.use-llm:true}")
     private boolean useLlm;
 
     public PredictService(RiskScoreEngine engine, UnderwritingDecisionMapper decisionMapper,
                           PolicyApplicationMapper policyApplicationMapper, RuleService ruleService,
-                          AiService aiService) {
+                          AiService aiService, AdjustmentService adjustmentService) {
         this.engine = engine;
         this.decisionMapper = decisionMapper;
         this.policyApplicationMapper = policyApplicationMapper;
         this.ruleService = ruleService;
         this.aiService = aiService;
+        this.adjustmentService = adjustmentService;
     }
 
     /** 仅试算，不落库。 */
@@ -64,9 +66,16 @@ public class PredictService {
         d.setUnderwritingResult(r.getUnderwritingResult());
         d.setPremiumAdjustment(r.getPremiumAdjustment());
         d.setKeyFactors(buildFactors(r, d));
+        // 创建时间为空（预测前未落库）则补为当前时间；已有则保持原值
+        if (d.getCreatedAt() == null) {
+            d.setCreatedAt(LocalDateTime.now());
+        }
         d.setUpdatedAt(LocalDateTime.now());
         decisionMapper.updatePrediction(d);
-        return decisionMapper.selectById(decisionId);
+        UnderwritingDecision saved = decisionMapper.selectById(decisionId);
+        // 备份本次 AI 预测结果（供审核对比、永久保留，不受后续人工覆写影响）
+        adjustmentService.saveAiBaseline(saved);
+        return saved;
     }
 
     /**

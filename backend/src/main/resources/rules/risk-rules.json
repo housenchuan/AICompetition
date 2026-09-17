@@ -55,9 +55,9 @@
   "familyHistoryNote": "家族病史类型划分待历史数据挖掘填充（对应评分点 2.1.2）。",
   "levels": [
     { "level": "标准体",     "result": "标保（标准费率承保）",              "note": "健康风险低，按标准费率正常承保。从给出的样本数据层面上，理赔概率低于47.5%",           "scoreRangeText": "0 ~ 45",                 "minScore": 0,   "maxScore": 45,  "claimProb": "< 47.5%",        "premiumAdjustment": 1.0 },
-    { "level": "次标体A级",  "result": "加费承保（加费10%~20%）",            "note": "存在轻度风险因素，加费后承保。从给出的样本数据层面上，理赔概率介于[47.5%,67.5%)",       "scoreRangeText": "46 ~ 69",                "minScore": 46,  "maxScore": 69,  "claimProb": "[47.5%, 67.5%)", "premiumAdjustment": 1.15 },
-    { "level": "次标体B级",  "result": "加费承保（加费20%~50%）或除外责任",   "note": "存在中度风险因素，加费或除外相关疾病。从给出的样本数据层面上，理赔概率介于[67.5%,82.5%)", "scoreRangeText": "70 ~ 84",                "minScore": 70,  "maxScore": 84,  "claimProb": "[67.5%, 82.5%)", "premiumAdjustment": 1.35 },
-    { "level": "高风险体",   "result": "延期承保并加费50%以上",             "note": "风险较高，需进一步体检并延期观察。从给出的样本数据层面上，理赔概率介于[82.5%,97.5%)",   "scoreRangeText": "85 ~ 99",                "minScore": 85,  "maxScore": 99,  "claimProb": "[82.5%, 97.5%)", "premiumAdjustment": 1.6 },
+    { "level": "次标体A级",  "result": "加费承保（加费10%~20%）",            "note": "存在轻度风险因素，加费后承保。从给出的样本数据层面上，理赔概率介于[47.5%,67.5%)",       "scoreRangeText": "50 ~ 65",                "minScore": 50,  "maxScore": 65,  "claimProb": "[47.5%, 67.5%)", "premiumAdjustment": 1.15 },
+    { "level": "次标体B级",  "result": "加费承保（加费20%~50%）或除外责任",   "note": "存在中度风险因素，加费或除外相关疾病。从给出的样本数据层面上，理赔概率介于[67.5%,82.5%)", "scoreRangeText": "70 ~ 80",                "minScore": 70,  "maxScore": 80,  "claimProb": "[67.5%, 82.5%)", "premiumAdjustment": 1.35 },
+    { "level": "高风险体",   "result": "延期承保并加费50%以上",             "note": "风险较高，需进一步体检并延期观察。从给出的样本数据层面上，理赔概率介于[82.5%,97.5%)",   "scoreRangeText": "85 ~ 95",                "minScore": 85,  "maxScore": 95,  "claimProb": "[82.5%, 97.5%)", "premiumAdjustment": 1.6 },
     { "level": "拒保体",     "result": "拒保",                            "note": "风险过高或存在明确拒保疾病，不予承保",                                             "scoreRangeText": "≥ 100 分，或存在直接拒保疾病", "minScore": 100, "maxScore": 999, "claimProb": "-",              "premiumAdjustment": 1.0 }
   ],
   "levelsFootnote": "注：存在以下情况之一的，直接判定为\"拒保体\"，不累计计分：恶性肿瘤（癌症）病史、严重器官疾病（心衰、肾衰、肝硬化）、严重精神疾病、AIDS/HIV感染、药物/酒精成瘾、近6个月内曾有拒保记录。（分级需要根据样本数据的标准进行；该样本数据进行过抽样重组，理赔比例非实际生产运转比例，仅供比赛使用，且实际核保结论会有保额调整或除外，也做简化处理）",

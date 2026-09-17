@@ -206,11 +206,9 @@ public class RiskScoreEngine {
                 return;
             }
         }
-        // 超出最高区间：按最高风险体处理
-        JsonNode top = ruleService.section("levels").get(3);
-        r.setRiskLevel(top.get("level").asText());
-        r.setUnderwritingResult(top.get("result").asText());
-        r.setPremiumAdjustment(new BigDecimal(top.get("premiumAdjustment").asText()));
+        // 正常配置下每个可达总分都能命中某一档（各维度加分均为5的倍数，区间已全覆盖）。
+        // 若走到这里，说明 levels 区间配置有漏档：快速失败暴露问题，而非悄悄误判等级。
+        throw new IllegalStateException("总分 " + total + " 未命中任何风险等级区间，请检查 risk-rules.json 的 levels 配置");
     }
 
     private boolean containsAny(String text, JsonNode diseases) {

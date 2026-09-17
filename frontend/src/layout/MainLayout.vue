@@ -10,11 +10,20 @@
       </div>
       <div class="topnav-right">
         <span class="status"><i class="dot"></i>系统运行中</span>
-        <div class="user">
-          <div class="avatar">管</div>
-          <div class="user-meta">
-            <div class="user-name">管理员</div>
-            <div class="user-role">核保专员</div>
+        <div class="role-switch" v-click-outside="closeRoleMenu">
+          <div class="user" @click="roleMenuOpen = !roleMenuOpen">
+            <div class="avatar">{{ role.avatar }}</div>
+            <div class="user-meta">
+              <div class="user-name">{{ role.name }}</div>
+              <div class="user-role">点击切换角色</div>
+            </div>
+            <svg class="caret" :class="{ open: roleMenuOpen }" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div v-if="roleMenuOpen" class="role-menu">
+            <div v-for="r in roleList" :key="r.key" class="role-item"
+              :class="{ current: r.key === role.key }" @click="onSwitchRole(r.key)">
+              <span class="tick">{{ r.key === role.key ? '✓' : '' }}</span>{{ r.name }}
+            </div>
           </div>
         </div>
       </div>
@@ -24,29 +33,8 @@
       <el-aside width="188px" class="aside">
         <div class="nav-label">导航菜单</div>
         <el-menu :default-active="activeMenu" router class="menu">
-          <el-menu-item index="/home">
-            <span class="mi" v-html="icons.home"></span><span>首页概览</span>
-          </el-menu-item>
-          <el-menu-item index="/assistant">
-            <span class="mi" v-html="icons.chat"></span><span>智能助手</span>
-          </el-menu-item>
-          <el-menu-item index="/history">
-            <span class="mi" v-html="icons.users"></span><span>历史客户画像</span>
-          </el-menu-item>
-          <el-menu-item index="/applications">
-            <span class="mi" v-html="icons.doc"></span><span>投保申请记录</span>
-          </el-menu-item>
-          <el-menu-item index="/decisions">
-            <span class="mi" v-html="icons.check"></span><span>核保决策结果</span>
-          </el-menu-item>
-          <el-menu-item index="/summary">
-            <span class="mi" v-html="icons.chart"></span><span>数据汇总统计</span>
-          </el-menu-item>
-          <el-menu-item index="/rules">
-            <span class="mi" v-html="icons.rules"></span><span>风险计分规则</span>
-          </el-menu-item>
-          <el-menu-item index="/feedback">
-            <span class="mi" v-html="icons.bulb"></span><span>用户反馈</span>
+          <el-menu-item v-for="m in visibleMenus" :key="m.path" :index="m.path">
+            <span class="mi" v-html="icons[m.icon]"></span><span>{{ m.title }}</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -68,13 +56,31 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { ClickOutside as vClickOutside } from 'element-plus'
 import { icons } from '../icons'
 import FeedbackDialog from '../components/FeedbackDialog.vue'
+import { MENUS, ROLE_LIST, currentRole, setRole, canAccess } from '../roles'
 
 const route = useRoute()
+const router = useRouter()
 const activeMenu = computed(() => route.path)
 const feedbackVisible = ref(false)
+
+// 角色与按角色过滤后的可见菜单
+const role = computed(() => currentRole())
+const roleList = ROLE_LIST
+const roleMenuOpen = ref(false)
+const visibleMenus = computed(() => MENUS.filter(m => role.value.menus.includes(m.path)))
+
+function closeRoleMenu() { roleMenuOpen.value = false }
+
+function onSwitchRole(key) {
+  setRole(key)
+  roleMenuOpen.value = false
+  // 切换后若当前页面对新角色不可见，回到首页
+  if (!canAccess(route.path)) router.replace('/home')
+}
 </script>
 
 <style scoped>
@@ -108,7 +114,12 @@ const feedbackVisible = ref(false)
 .topnav-right { display: flex; align-items: center; gap: 20px; }
 .status { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #52c41a; }
 .status .dot { width: 7px; height: 7px; border-radius: 50%; background: #52c41a; display: inline-block; }
-.user { display: flex; align-items: center; gap: 9px; }
+
+.role-switch { position: relative; }
+.user { display: flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; }
+.caret { color: #a0a4ab; margin-left: 2px; transition: transform 0.2s, color 0.15s; }
+.caret.open { transform: rotate(180deg); }
+.user:hover .caret { color: var(--brand); }
 .avatar {
   width: 34px; height: 34px; border-radius: 50%;
   background: var(--el-color-primary-light-9); color: var(--brand);
@@ -117,6 +128,30 @@ const feedbackVisible = ref(false)
 }
 .user-name { font-size: 13px; color: #1f2329; font-weight: 500; line-height: 1.2; }
 .user-role { font-size: 11px; color: #a0a4ab; }
+
+.role-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid #eef0f3;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  padding: 6px;
+  z-index: 1000;
+}
+.role-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #4a4f57;
+  cursor: pointer;
+}
+.role-item:hover { background: #f6f7f9; }
+.role-item.current { color: var(--brand); font-weight: 600; }
+.tick { width: 12px; display: inline-block; color: var(--brand); }
 
 .body { height: calc(100vh - 60px); }
 .aside {

@@ -16,9 +16,11 @@ import java.util.UUID;
 public class UnderwritingDecisionService {
 
     private final UnderwritingDecisionMapper mapper;
+    private final AdjustmentService adjustmentService;
 
-    public UnderwritingDecisionService(UnderwritingDecisionMapper mapper) {
+    public UnderwritingDecisionService(UnderwritingDecisionMapper mapper, AdjustmentService adjustmentService) {
         this.mapper = mapper;
+        this.adjustmentService = adjustmentService;
     }
 
     public PageResult<UnderwritingDecision> page(UnderwritingDecisionQuery query) {
@@ -42,11 +44,18 @@ public class UnderwritingDecisionService {
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
         List<UnderwritingDecision> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
-        return PageResult.of(list);
+        PageResult<UnderwritingDecision> pr = PageResult.of(list);
+        // 合并人工修整状态标签（来自文件存储，非 DB 列）
+        for (UnderwritingDecision d : list) {
+            d.setAdjustStatus(adjustmentService.latestStatusTag(d.getDecisionId()));
+        }
+        return pr;
     }
 
     public UnderwritingDecision getById(String decisionId) {
-        return mapper.selectById(decisionId);
+        UnderwritingDecision d = mapper.selectById(decisionId);
+        if (d != null) d.setAdjustStatus(adjustmentService.latestStatusTag(decisionId));
+        return d;
     }
 
     public UnderwritingDecision getByApplicationId(String applicationId) {
