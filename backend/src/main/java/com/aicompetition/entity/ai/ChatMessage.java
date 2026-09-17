@@ -1,8 +1,13 @@
 package com.aicompetition.entity.ai;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ChatMessage {
     private String role;
     private String content;
+    /** 推理模型（如 DeepSeek）的思考过程字段，仅作兼容映射，业务取值仍用 content。 */
+    @JsonProperty("reasoning_content")
+    private String reasoningContent;
 
     public ChatMessage() {}
 
@@ -17,6 +22,10 @@ public class ChatMessage {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+
+    public String getReasoningContent() { return reasoningContent; }
+    public void setReasoningContent(String reasoningContent) { this.reasoningContent = reasoningContent; }
 }

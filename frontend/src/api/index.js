@@ -51,7 +51,9 @@ export const predictApi = {
 
 // 自然语言指令
 export const nlApi = {
-  parse: (text) => request.post('/api/nl/parse', { text })
+  parse: (text) => request.post('/api/nl/parse', { text }),
+  // 自然语言统计（text-to-SQL：LLM 生成 SELECT 后执行），LLM 生成耗时较长需放宽超时
+  stats: (text) => request.post('/api/nl/stats', { text }, { timeout: 120000 })
 }
 
 // 用户反馈

@@ -65,6 +65,20 @@
                       :label="col.label" :formatter="col.fmt" :width="col.width" show-overflow-tooltip />
                   </el-table>
                 </div>
+
+                <!-- 自然语言统计（text-to-SQL）：展示 AI 生成的 SQL 与查询结果 -->
+                <div v-if="m.statsRes" class="res">
+                  <div class="res-head">
+                    统计结果 · 共 {{ m.statsRes.rowCount }} 条
+                    <el-tag size="small" type="success" style="margin-left: 8px">爱码 LLM 生成 SQL 并执行</el-tag>
+                  </div>
+                  <pre class="sql-code">{{ m.statsRes.sql }}</pre>
+                  <el-table :data="m.statsRes.rows" border stripe size="small" max-height="320">
+                    <el-table-column v-for="c in m.statsRes.columns" :key="c" :prop="c" :label="c"
+                      min-width="110" show-overflow-tooltip />
+                  </el-table>
+                  <div v-if="m.statsRes.truncated" class="truncated">结果超过 200 条，仅展示前 200 条</div>
+                </div>
               </template>
             </template>
           </template>
@@ -175,7 +189,7 @@ async function send() {
     const it = res.data
     am.intent = it
     if (it.intent === 'AGGREGATE') {
-      await fillAggregate(am, it)
+      await fillStats(am, q, it)
     } else if (it.intent === 'QUERY') {
       await fillQuery(am, it)
     } else if (it.intent === 'PREDICT') {
@@ -233,6 +247,20 @@ const DIM_LABEL = {
   customerId: '投保人编号', month: '年月'
 }
 const AGG_ENTITIES = ['policy_applications', 'customer_risk_his', 'underwriting_decisions']
+
+// 自然语言统计：优先 text-to-SQL（表结构+问题传给爱码 LLM 生成 SELECT 并执行），失败回退结构化统计
+async function fillStats(am, q, it) {
+  try {
+    const res = await nlApi.stats(q)
+    am.statsRes = res.data
+    if (!res.data.rows.length) {
+      am.error = '统计查询无结果（当前条件下暂无数据）。'
+    }
+  } catch (e) {
+    // text-to-SQL 失败（LLM 不可达/校验不通过等）→ 回退原结构化统计
+    await fillAggregate(am, it)
+  }
+}
 
 async function fillAggregate(am, it) {
   const r = it.filters?.timeRange || {}
@@ -329,6 +357,12 @@ async function fillPredict(am, it) {
 .intent-chips .src { font-size: 11px; color: #b7bcc4; }
 .res { margin-top: 12px; }
 .res-head { font-size: 13px; color: #4a4f57; margin-bottom: 8px; }
+.sql-code {
+  background: #f6f8fa; border: 1px solid #e8eaee; border-radius: 8px;
+  padding: 10px 12px; margin: 0 0 10px; font-size: 12px; line-height: 1.6;
+  color: #383a42; white-space: pre-wrap; word-break: break-all; font-family: Consolas, Monaco, monospace;
+}
+.truncated { font-size: 12px; color: #b7bcc4; margin-top: 6px; }
 .mini-tiles { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
 .mt { background: #f7f8fa; border-radius: 10px; padding: 10px 16px; min-width: 84px; }
 .mt b { display: block; font-size: 20px; color: var(--brand); }
