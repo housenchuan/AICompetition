@@ -20,6 +20,15 @@ public class CustomerRiskHisQuery {
     /** 血压情况过滤：按分类标签等值匹配（正常/正常高值/临界高血压/轻度高血压/中度高血压） */
     private String bloodPressure;
 
+    private Integer ageMin;
+    private Integer ageMax;
+    private Integer incomeMin;
+    private Integer incomeMax;
+    private Double bmiMin;
+    private Double bmiMax;
+    private Integer scoreMin;
+    private Integer scoreMax;
+
     private String createdFrom;
     private String createdTo;
     private String updatedFrom;
@@ -57,6 +66,23 @@ public class CustomerRiskHisQuery {
 
     public Integer getTarget() { return target; }
     public void setTarget(Integer target) { this.target = target; }
+
+    public Integer getAgeMin() { return ageMin; }
+    public void setAgeMin(Integer ageMin) { this.ageMin = ageMin; }
+    public Integer getAgeMax() { return ageMax; }
+    public void setAgeMax(Integer ageMax) { this.ageMax = ageMax; }
+    public Integer getIncomeMin() { return incomeMin; }
+    public void setIncomeMin(Integer incomeMin) { this.incomeMin = incomeMin; }
+    public Integer getIncomeMax() { return incomeMax; }
+    public void setIncomeMax(Integer incomeMax) { this.incomeMax = incomeMax; }
+    public Double getBmiMin() { return bmiMin; }
+    public void setBmiMin(Double bmiMin) { this.bmiMin = bmiMin; }
+    public Double getBmiMax() { return bmiMax; }
+    public void setBmiMax(Double bmiMax) { this.bmiMax = bmiMax; }
+    public Integer getScoreMin() { return scoreMin; }
+    public void setScoreMin(Integer scoreMin) { this.scoreMin = scoreMin; }
+    public Integer getScoreMax() { return scoreMax; }
+    public void setScoreMax(Integer scoreMax) { this.scoreMax = scoreMax; }
 
     public String getCreatedFrom() { return createdFrom; }
     public void setCreatedFrom(String createdFrom) { this.createdFrom = createdFrom; }

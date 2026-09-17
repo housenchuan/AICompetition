@@ -74,6 +74,10 @@ public class UnderwritingDecisionService {
     }
 
     public UnderwritingDecision update(UnderwritingDecision entity) {
+        UnderwritingDecision existing = mapper.selectById(entity.getDecisionId());
+        if (existing == null || !"人工".equals(existing.getCreatedBy())) {
+            throw new IllegalArgumentException("系统生成的记录不允许手动编辑");
+        }
         entity.setUpdatedAt(DateUtils.nowStr());
         mapper.updateById(entity);
         return mapper.selectById(entity.getDecisionId());

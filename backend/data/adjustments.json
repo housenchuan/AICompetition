@@ -5,21 +5,35 @@
       "riskLevel" : "标准体",
       "underwritingResult" : "标保（标准费率承保）",
       "premiumAdjustment" : 1,
-      "keyFactors" : "职业(+5) ｜ 19岁女性服务员，仅职业中风险，余项均正常，规则评分为标准体，建议按标准费率承保。"
+      "keyFactors" : "关键风险为服务员职业属中风险，余项均正常；建议按标准体标准费率承保。"
     },
     "DEC240018" : {
       "riskScore" : 85,
       "riskLevel" : "高风险体",
       "underwritingResult" : "延期承保并加费50%以上",
       "premiumAdjustment" : 1.6,
-      "keyFactors" : "年龄(+40)、病史(+25)、血压(+15)、家族史(+5) ｜ 64岁女性，高血压病史伴轻度血压升高，家族史高风险，建议延期承保并加费50%以上。"
+      "keyFactors" : "64岁女性，高血压病史及家族史，综合高风险，建议延期承"
     },
     "DEC240009" : {
       "riskScore" : 35,
       "riskLevel" : "标准体",
       "underwritingResult" : "标保（标准费率承保）",
       "premiumAdjustment" : 1,
-      "keyFactors" : "吸烟(+15)、病史(+10)、BMI26.63(+5)、家族史(+5) ｜ BMI超重；吸烟；个人病史·轻度异常(+10)；家族病史中风险"
+      "keyFactors" : "BMI超重；吸烟；个人病史·轻度异常(+10)；家族病史中风险"
+    },
+    "DEC240014" : {
+      "riskScore" : 65,
+      "riskLevel" : "次标体A级",
+      "underwritingResult" : "加费承保（加费10%~20%）",
+      "premiumAdjustment" : 1.15,
+      "keyFactors" : "年龄中老年；临界高血压；经常饮酒（每日≥2标准杯）；个人病史·轻度异常(+10)；职业风险中风险；家"
+    },
+    "DEC240016" : {
+      "riskScore" : 75,
+      "riskLevel" : "次标体B级",
+      "underwritingResult" : "加费承保（加费20%~50%）或除外责任",
+      "premiumAdjustment" : 1.35,
+      "keyFactors" : "29岁男性建筑工人，吸烟且肥胖，患糖尿病，职业高风险，建议加费20%~50%或除外责任承保。"
     }
   },
   "adjustments" : {

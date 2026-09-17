@@ -156,7 +156,7 @@
               <el-descriptions-item label="年龄">{{ detailDec.age }}</el-descriptions-item>
               <el-descriptions-item label="性别">{{ detailDec.gender }}</el-descriptions-item>
               <el-descriptions-item label="职业类别">{{ detailDec.occupation }}</el-descriptions-item>
-              <el-descriptions-item label="年收入(元)">{{ detailDec.annualIncome }}</el-descriptions-item>
+              <el-descriptions-item label="年收入(元)">{{ detailDec.annualIncome != null ? Number(detailDec.annualIncome).toFixed(2) : '—' }}</el-descriptions-item>
               <el-descriptions-item label="社保">{{ detailDec.hasSocialInsurance ? '是' : '否' }}</el-descriptions-item>
               <el-descriptions-item label="吸烟">{{ detailDec.smokingStatus }}</el-descriptions-item>
               <el-descriptions-item label="饮酒">{{ detailDec.drinkingStatus }}</el-descriptions-item>

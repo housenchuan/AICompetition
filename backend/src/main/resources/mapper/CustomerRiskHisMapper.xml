@@ -70,6 +70,14 @@
                 <if test="q.hasSocialInsurance != null">AND has_social_insurance = #{q.hasSocialInsurance}</if>
                 <if test="q.target != null">AND target = #{q.target}</if>
                 <if test="q.bloodPressure != null and q.bloodPressure != ''">AND blood_pressure = #{q.bloodPressure}</if>
+                <if test="q.ageMin != null">AND age &gt;= #{q.ageMin}</if>
+                <if test="q.ageMax != null">AND age &lt;= #{q.ageMax}</if>
+                <if test="q.incomeMin != null">AND annual_income &gt;= #{q.incomeMin}</if>
+                <if test="q.incomeMax != null">AND annual_income &lt;= #{q.incomeMax}</if>
+                <if test="q.bmiMin != null">AND bmi &gt;= #{q.bmiMin}</if>
+                <if test="q.bmiMax != null">AND bmi &lt;= #{q.bmiMax}</if>
+                <if test="q.scoreMin != null">AND score_v1 &gt;= #{q.scoreMin}</if>
+                <if test="q.scoreMax != null">AND score_v1 &lt;= #{q.scoreMax}</if>
             </if>
             <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
             <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>

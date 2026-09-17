@@ -1,5 +1,8 @@
 package com.aicompetition.config;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
@@ -8,14 +11,11 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 
-/**
- * 统一 JSON 时间格式：
- * - LocalDateTime -> yyyy-MM-dd HH:mm:ss
- * - LocalDate     -> yyyy-MM-dd
- * 列表与详情返回一致，输入同样按此格式解析。
- */
 @Configuration
 public class JacksonConfig {
 
@@ -29,6 +29,14 @@ public class JacksonConfig {
             builder.deserializers(new LocalDateTimeDeserializer(DATETIME));
             builder.serializers(new LocalDateSerializer(DATE));
             builder.deserializers(new LocalDateDeserializer(DATE));
+            // BigDecimal 统一保留 2 位小数，避免 500000.0 / 1000.0 等精度丢失
+            builder.serializerByType(BigDecimal.class, new JsonSerializer<BigDecimal>() {
+                @Override
+                public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers)
+                        throws IOException {
+                    gen.writeNumber(value.setScale(2, RoundingMode.HALF_UP).toPlainString());
+                }
+            });
         };
     }
 }

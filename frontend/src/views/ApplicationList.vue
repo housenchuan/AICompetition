@@ -58,8 +58,8 @@
         <el-table-column prop="productType" label="产品类型" min-width="100" column-key="productType"
           :filters="productTypeFilters" :filter-multiple="false" />
         <el-table-column prop="productName" label="产品名称" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="coverageAmount" label="保额(元)" min-width="110" />
-        <el-table-column prop="premium" label="保费(元)" min-width="100" />
+        <el-table-column prop="coverageAmount" label="保额(元)" min-width="110" :formatter="(r,c,v) => v != null ? Number(v).toFixed(2) : '—'" />
+        <el-table-column prop="premium" label="保费(元)" min-width="100" :formatter="(r,c,v) => v != null ? Number(v).toFixed(2) : '—'" />
         <el-table-column prop="paymentFrequency" label="缴费频率" min-width="100" />
         <el-table-column prop="insurancePeriod" label="保障期限" min-width="100" />
         <el-table-column label="申请状态" min-width="110" column-key="status"
@@ -75,7 +75,7 @@
         <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>
-            <el-button link type="success" @click="openEdit(row)">编辑</el-button>
+            <el-button v-if="row.createdBy === '人工'" link type="success" @click="openEdit(row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -94,8 +94,8 @@
           <el-descriptions-item label="投保人编号">{{ current.customerId }}</el-descriptions-item>
           <el-descriptions-item label="产品类型">{{ current.productType }}</el-descriptions-item>
           <el-descriptions-item label="产品名称">{{ current.productName }}</el-descriptions-item>
-          <el-descriptions-item label="保额(元)">{{ current.coverageAmount }}</el-descriptions-item>
-          <el-descriptions-item label="保费(元)">{{ current.premium }}</el-descriptions-item>
+          <el-descriptions-item label="保额(元)">{{ current.coverageAmount != null ? Number(current.coverageAmount).toFixed(2) : '—' }}</el-descriptions-item>
+          <el-descriptions-item label="保费(元)">{{ current.premium != null ? Number(current.premium).toFixed(2) : '—' }}</el-descriptions-item>
           <el-descriptions-item label="缴费频率">{{ current.paymentFrequency }}</el-descriptions-item>
           <el-descriptions-item label="保障期限">{{ current.insurancePeriod }}</el-descriptions-item>
           <el-descriptions-item label="等待期(天)">{{ current.waitingPeriod }}</el-descriptions-item>
@@ -117,7 +117,7 @@
             <el-descriptions-item label="年龄">{{ decision.age }}</el-descriptions-item>
             <el-descriptions-item label="性别">{{ decision.gender }}</el-descriptions-item>
             <el-descriptions-item label="职业类别">{{ decision.occupation }}</el-descriptions-item>
-            <el-descriptions-item label="年收入(元)">{{ decision.annualIncome }}</el-descriptions-item>
+            <el-descriptions-item label="年收入(元)">{{ decision.annualIncome != null ? Number(decision.annualIncome).toFixed(2) : '—' }}</el-descriptions-item>
             <el-descriptions-item label="社保">{{ decision.hasSocialInsurance ? '是' : '否' }}</el-descriptions-item>
             <el-descriptions-item label="吸烟">{{ decision.smokingStatus }}</el-descriptions-item>
             <el-descriptions-item label="饮酒">{{ decision.drinkingStatus }}</el-descriptions-item>
@@ -164,8 +164,8 @@
                 </el-select>
               </el-form-item></el-col>
               <el-col :span="12"><el-form-item label="产品名称"><el-input v-model="appForm.productName" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="保额(元)"><el-input-number v-model="appForm.coverageAmount" :min="0" :controls="false" style="width:100%" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="保费(元)"><el-input-number v-model="appForm.premium" :min="0" :controls="false" style="width:100%" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="保额(元)"><el-input-number v-model="appForm.coverageAmount" :min="0" :controls="false" :precision="2" style="width:100%" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="保费(元)"><el-input-number v-model="appForm.premium" :min="0" :controls="false" :precision="2" style="width:100%" /></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="缴费频率">
                 <el-select v-model="appForm.paymentFrequency" placeholder="请选择" style="width:100%">
                   <el-option label="年缴" value="年缴" /><el-option label="半年缴" value="半年缴" /><el-option label="季缴" value="季缴" /><el-option label="月缴" value="月缴" />
@@ -193,7 +193,7 @@
                 <el-select v-model="decForm.gender" style="width:100%"><el-option label="男" value="男" /><el-option label="女" value="女" /></el-select>
               </el-form-item></el-col>
               <el-col :span="12"><el-form-item label="职业类别"><el-input v-model="decForm.occupation" /></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="年收入(元)"><el-input-number v-model="decForm.annualIncome" :min="0" :controls="false" style="width:100%" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="年收入(元)"><el-input-number v-model="decForm.annualIncome" :min="0" :controls="false" :precision="2" style="width:100%" /></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="是否有社保"><el-switch v-model="decForm.hasSocialInsurance" /></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="吸烟状况">
                 <el-select v-model="decForm.smokingStatus" style="width:100%"><el-option label="是" value="是" /><el-option label="否" value="否" /><el-option label="已戒烟" value="已戒烟" /></el-select>

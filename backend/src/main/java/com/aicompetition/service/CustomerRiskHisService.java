@@ -21,24 +21,13 @@ public class CustomerRiskHisService {
     }
 
     public PageResult<CustomerRiskHis> page(CustomerRiskHisQuery query) {
-        CustomerRiskHis q = new CustomerRiskHis();
-        q.setProfileId(query.getProfileId());
-        q.setCustomerId(query.getCustomerId());
-        q.setGender(query.getGender());
-        q.setOccupation(query.getOccupation());
-        q.setSmokingStatus(query.getSmokingStatus());
-        q.setDrinkingStatus(query.getDrinkingStatus());
-        q.setHasSocialInsurance(query.getHasSocialInsurance());
-        q.setTarget(query.getTarget());
-        q.setBloodPressure(query.getBloodPressure());
-
         String createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
         String createdTo   = DateUtils.endOfDay(query.getCreatedTo());
         String updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
         String updatedTo   = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
-        List<CustomerRiskHis> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
+        List<CustomerRiskHis> list = mapper.selectList(query, createdFrom, createdTo, updatedFrom, updatedTo);
         return PageResult.of(list);
     }
 

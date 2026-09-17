@@ -1,6 +1,7 @@
 package com.aicompetition.mapper;
 
 import com.aicompetition.entity.CustomerRiskHis;
+import com.aicompetition.query.CustomerRiskHisQuery;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface CustomerRiskHisMapper {
     /**
      * 条件查询。q 中的非空字段作等值过滤；时间参数作范围过滤（可为空）。
      */
-    List<CustomerRiskHis> selectList(@Param("q") CustomerRiskHis q,
+    List<CustomerRiskHis> selectList(@Param("q") CustomerRiskHisQuery q,
                                      @Param("createdFrom") String createdFrom,
                                      @Param("createdTo") String createdTo,
                                      @Param("updatedFrom") String updatedFrom,

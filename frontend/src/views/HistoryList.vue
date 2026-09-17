@@ -44,6 +44,44 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row :gutter="12">
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
+            <el-form-item label="年龄">
+              <div class="range-input">
+                <el-input-number v-model="ageMin" :controls="false" placeholder="最小" style="width: 100%" />
+                <span class="range-sep">~</span>
+                <el-input-number v-model="ageMax" :controls="false" placeholder="最大" style="width: 100%" />
+              </div>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
+            <el-form-item label="年收入(元)">
+              <div class="range-input">
+                <el-input-number v-model="incomeMin" :controls="false" placeholder="最小" style="width: 100%" />
+                <span class="range-sep">~</span>
+                <el-input-number v-model="incomeMax" :controls="false" placeholder="最大" style="width: 100%" />
+              </div>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
+            <el-form-item label="BMI">
+              <div class="range-input">
+                <el-input-number v-model="bmiMin" :controls="false" :precision="1" placeholder="最小" style="width: 100%" />
+                <span class="range-sep">~</span>
+                <el-input-number v-model="bmiMax" :controls="false" :precision="1" placeholder="最大" style="width: 100%" />
+              </div>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8" :xl="6">
+            <el-form-item label="首版评分">
+              <div class="range-input">
+                <el-input-number v-model="scoreMin" :controls="false" placeholder="最小" style="width: 100%" />
+                <span class="range-sep">~</span>
+                <el-input-number v-model="scoreMax" :controls="false" placeholder="最大" style="width: 100%" />
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
         <div class="filter-actions">
           <el-button type="primary" @click="search">查询</el-button>
           <el-button @click="reset">重置</el-button>
@@ -60,7 +98,7 @@
         <el-table-column prop="gender" label="性别" min-width="80" column-key="gender"
           :filters="genderFilters" :filter-multiple="false" />
         <el-table-column prop="occupation" label="职业类别" min-width="110" show-overflow-tooltip />
-        <el-table-column prop="annualIncome" label="年收入(元)" min-width="110" />
+        <el-table-column prop="annualIncome" label="年收入(元)" min-width="110" :formatter="(r,c,v) => v != null ? Number(v).toFixed(2) : '—'" />
         <el-table-column label="社保" min-width="80" column-key="social"
           :filters="socialFilters" :filter-multiple="false">
           <template #default="{ row }">{{ row.hasSocialInsurance ? '是' : '否' }}</template>
@@ -101,7 +139,7 @@
         <el-descriptions-item label="年龄">{{ current.age }}</el-descriptions-item>
         <el-descriptions-item label="性别">{{ current.gender }}</el-descriptions-item>
         <el-descriptions-item label="职业类别">{{ current.occupation }}</el-descriptions-item>
-        <el-descriptions-item label="年收入(元)">{{ current.annualIncome }}</el-descriptions-item>
+        <el-descriptions-item label="年收入(元)">{{ current.annualIncome != null ? Number(current.annualIncome).toFixed(2) : '—' }}</el-descriptions-item>
         <el-descriptions-item label="社保">{{ current.hasSocialInsurance ? '是' : '否' }}</el-descriptions-item>
         <el-descriptions-item label="吸烟">{{ current.smokingStatus }}</el-descriptions-item>
         <el-descriptions-item label="饮酒">{{ current.drinkingStatus }}</el-descriptions-item>
@@ -131,6 +169,14 @@ const detailVisible = ref(false)
 const current = ref(null)
 const tableRef = ref(null)
 const bpCategory = ref('')
+const ageMin = ref(null)
+const ageMax = ref(null)
+const incomeMin = ref(null)
+const incomeMax = ref(null)
+const bmiMin = ref(null)
+const bmiMax = ref(null)
+const scoreMin = ref(null)
+const scoreMax = ref(null)
 
 // 列头筛选选项
 const genderFilters = [ { text: '男', value: '男' }, { text: '女', value: '女' } ]
@@ -161,6 +207,14 @@ async function load() {
     params.updatedFrom = updatedRange.value?.[0]
     params.updatedTo = updatedRange.value?.[1]
     params.bloodPressure = bpCategory.value || null
+    params.ageMin = ageMin.value ?? null
+    params.ageMax = ageMax.value ?? null
+    params.incomeMin = incomeMin.value ?? null
+    params.incomeMax = incomeMax.value ?? null
+    params.bmiMin = bmiMin.value ?? null
+    params.bmiMax = bmiMax.value ?? null
+    params.scoreMin = scoreMin.value ?? null
+    params.scoreMax = scoreMax.value ?? null
     const res = await customerRiskApi.page(params)
     rows.value = res.data.list
     total.value = res.data.total
@@ -194,6 +248,14 @@ function reset() {
   query.hasSocialInsurance = null
   query.target = null
   bpCategory.value = ''
+  ageMin.value = null
+  ageMax.value = null
+  incomeMin.value = null
+  incomeMax.value = null
+  bmiMin.value = null
+  bmiMax.value = null
+  scoreMin.value = null
+  scoreMax.value = null
   createdRange.value = []
   updatedRange.value = []
   tableRef.value?.clearFilter()
@@ -215,6 +277,10 @@ onMounted(load)
 <style scoped>
 .pager { margin-top: 14px; justify-content: flex-end; }
 .filter-bar :deep(.el-form-item__label) { white-space: nowrap; }
+.range-input { display: flex; align-items: center; gap: 6px; width: 100%; }
+.range-input :deep(.el-input-number) { flex: 1; min-width: 0; }
+.range-input :deep(.el-input-number .el-input__wrapper) { width: 100%; }
+.range-sep { color: var(--el-text-color-placeholder); flex-shrink: 0; font-size: 14px; }
 /* 常显横向滚动条不遮挡最后一行数据 */
 :deep(.el-table__body-wrapper .el-scrollbar__view) { padding-bottom: 12px; }
 </style>
