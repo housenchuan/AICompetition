@@ -6,9 +6,9 @@ spring:
   config:
     import: "optional:classpath:application-local.yml"
   datasource:
-    url: jdbc:postgresql://localhost:5432/aicompetition
-    username: housenchuan
-    password:
+    url: jdbc:postgresql://D2WIZSSCM-postgresql.dbdev.paic.com.cn:3023/2026aiinallteam3
+    username: contestantTeam3
+    password: "B-/D.J9#A^"
     driver-class-name: org.postgresql.Driver
 
 mybatis:
