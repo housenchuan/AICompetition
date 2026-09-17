@@ -104,12 +104,12 @@
         <el-table-column prop="createdBy" label="创建人" min-width="90" />
         <el-table-column prop="createdAt" label="创建时间" min-width="160" />
         <el-table-column prop="updatedAt" label="更新时间" min-width="160" />
-        <el-table-column label="操作" width="210" fixed="right">
+        <el-table-column label="操作" width="188" fixed="right">
           <template #default="{ row }">
-            <el-tag v-if="row.adjustStatus === '待审批'" type="warning" size="small" effect="plain" style="margin-right:6px">待审批</el-tag>
             <el-button link type="primary" @click="openDetail(row)">详情</el-button>
             <el-button link type="warning" :loading="predictingId === row.decisionId" :disabled="batchRunning" @click="doPredictOne(row)">预测</el-button>
-            <el-button v-if="canAdjust" link type="success" :disabled="row.riskLevel == null || row.adjustStatus === '待审批'"
+            <el-button v-if="canReview && row.adjustStatus === '待审批'" link type="danger" @click="openReview(row)">审核</el-button>
+            <el-button v-if="canAdjust && row.adjustStatus !== '待审批'" link type="success" :disabled="row.riskLevel == null"
               @click="openAdjust(row)">人工修整</el-button>
           </template>
         </el-table-column>
@@ -120,66 +120,72 @@
         :page-sizes="[10, 20, 50, 100]" @current-change="onPage" @size-change="onSize" />
     </div>
 
-    <!-- 详情：投保申请 + 核保决策 两张表全字段（与投保申请记录页一致） -->
-    <el-dialog v-model="detailVisible" title="投保核保关联详情" width="820px">
+    <!-- 详情 / 审核：详情=投保申请+核保决策；审核=核保决策+人工修整审计（不含投保申请） -->
+    <el-dialog v-model="detailVisible" :title="dialogMode === 'review' ? ('人工修整审核 · ' + (detailDec?.decisionId || '')) : '投保核保关联详情'" width="820px">
       <template v-if="detailApp || detailDec">
-        <div class="sec-title">投保申请信息</div>
-        <el-empty v-if="!detailApp" description="无关联投保申请" :image-size="60" />
-        <el-descriptions v-else :column="2" border size="small">
-          <el-descriptions-item label="申请编号">{{ detailApp.profileId }}</el-descriptions-item>
-          <el-descriptions-item label="投保人编号">{{ detailApp.customerId }}</el-descriptions-item>
-          <el-descriptions-item label="产品类型">{{ detailApp.productType }}</el-descriptions-item>
-          <el-descriptions-item label="产品名称">{{ detailApp.productName }}</el-descriptions-item>
-          <el-descriptions-item label="保额(元)">{{ detailApp.coverageAmount }}</el-descriptions-item>
-          <el-descriptions-item label="保费(元)">{{ detailApp.premium }}</el-descriptions-item>
-          <el-descriptions-item label="缴费频率">{{ detailApp.paymentFrequency }}</el-descriptions-item>
-          <el-descriptions-item label="保障期限">{{ detailApp.insurancePeriod }}</el-descriptions-item>
-          <el-descriptions-item label="等待期(天)">{{ detailApp.waitingPeriod }}</el-descriptions-item>
-          <el-descriptions-item label="受益人关系">{{ detailApp.beneficiaryRelationship }}</el-descriptions-item>
-          <el-descriptions-item label="申请日期">{{ detailApp.applicationDate }}</el-descriptions-item>
-          <el-descriptions-item label="申请状态">{{ detailApp.status }}</el-descriptions-item>
-          <el-descriptions-item label="创建人">{{ detailApp.createdBy }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ detailApp.createdAt }}</el-descriptions-item>
-        </el-descriptions>
-
-        <div class="sec-title">核保决策信息</div>
-        <el-empty v-if="!detailDec" description="该申请暂无核保决策结果" :image-size="60" />
-        <template v-else>
-          <el-descriptions :column="2" border size="small">
-            <el-descriptions-item label="核保决策唯一标识">{{ detailDec.decisionId }}</el-descriptions-item>
-            <el-descriptions-item label="投保申请编号">{{ detailDec.applicationId }}</el-descriptions-item>
-            <el-descriptions-item label="投保人编号">{{ detailDec.customerId }}</el-descriptions-item>
-            <el-descriptions-item label="年龄">{{ detailDec.age }}</el-descriptions-item>
-            <el-descriptions-item label="性别">{{ detailDec.gender }}</el-descriptions-item>
-            <el-descriptions-item label="职业类别">{{ detailDec.occupation }}</el-descriptions-item>
-            <el-descriptions-item label="年收入(元)">{{ detailDec.annualIncome }}</el-descriptions-item>
-            <el-descriptions-item label="社保">{{ detailDec.hasSocialInsurance ? '是' : '否' }}</el-descriptions-item>
-            <el-descriptions-item label="吸烟">{{ detailDec.smokingStatus }}</el-descriptions-item>
-            <el-descriptions-item label="饮酒">{{ detailDec.drinkingStatus }}</el-descriptions-item>
-            <el-descriptions-item label="BMI">{{ detailDec.bmi }}</el-descriptions-item>
-            <el-descriptions-item label="血压">{{ detailDec.bloodPressure }}</el-descriptions-item>
-            <el-descriptions-item label="个人病史">{{ detailDec.personalMedicalHistory || '无' }}</el-descriptions-item>
-            <el-descriptions-item label="家族病史" :span="2">{{ detailDec.familyMedicalHistory || '无' }}</el-descriptions-item>
-            <el-descriptions-item label="创建人">{{ detailDec.createdBy }}</el-descriptions-item>
-            <el-descriptions-item label="创建时间">{{ detailDec.createdAt }}</el-descriptions-item>
-            <el-descriptions-item label="更新时间">{{ detailDec.updatedAt }}</el-descriptions-item>
+        <template v-if="dialogMode === 'detail'">
+          <div class="sec-title">投保申请信息</div>
+          <el-empty v-if="!detailApp" description="无关联投保申请" :image-size="60" />
+          <el-descriptions v-else :column="2" border size="small">
+            <el-descriptions-item label="申请编号">{{ detailApp.profileId }}</el-descriptions-item>
+            <el-descriptions-item label="投保人编号">{{ detailApp.customerId }}</el-descriptions-item>
+            <el-descriptions-item label="产品类型">{{ detailApp.productType }}</el-descriptions-item>
+            <el-descriptions-item label="产品名称">{{ detailApp.productName }}</el-descriptions-item>
+            <el-descriptions-item label="保额(元)">{{ detailApp.coverageAmount }}</el-descriptions-item>
+            <el-descriptions-item label="保费(元)">{{ detailApp.premium }}</el-descriptions-item>
+            <el-descriptions-item label="缴费频率">{{ detailApp.paymentFrequency }}</el-descriptions-item>
+            <el-descriptions-item label="保障期限">{{ detailApp.insurancePeriod }}</el-descriptions-item>
+            <el-descriptions-item label="等待期(天)">{{ detailApp.waitingPeriod }}</el-descriptions-item>
+            <el-descriptions-item label="受益人关系">{{ detailApp.beneficiaryRelationship }}</el-descriptions-item>
+            <el-descriptions-item label="申请日期">{{ detailApp.applicationDate }}</el-descriptions-item>
+            <el-descriptions-item label="申请状态">{{ detailApp.status }}</el-descriptions-item>
+            <el-descriptions-item label="创建人">{{ detailApp.createdBy }}</el-descriptions-item>
+            <el-descriptions-item label="创建时间">{{ detailApp.createdAt }}</el-descriptions-item>
           </el-descriptions>
-          <el-descriptions class="ai-desc" :column="2" border size="small">
-            <el-descriptions-item label="风险评分">
-              <span class="score">{{ detailDec.riskScore ?? '待预测' }}</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="风险等级">
-              <el-tag v-if="detailDec.riskLevel" :type="riskType(detailDec.riskLevel)" size="small">{{ detailDec.riskLevel }}</el-tag>
-              <span v-else>待预测</span>
-            </el-descriptions-item>
-            <el-descriptions-item label="核保结论">{{ detailDec.underwritingResult ?? '待预测' }}</el-descriptions-item>
-            <el-descriptions-item label="加费比例">{{ detailDec.premiumAdjustment ?? '—' }}</el-descriptions-item>
-            <el-descriptions-item label="关键风险因子" :span="2">{{ detailDec.keyFactors ?? '待预测' }}</el-descriptions-item>
-          </el-descriptions>
+        </template>
 
-          <!-- 人工修整 · 审计留痕 / 分级审批 -->
-          <template v-if="audit && (audit.records?.length || audit.aiBaseline)">
-            <div class="sec-title" style="margin-top:16px">人工修整审计</div>
+        <!-- 核保决策信息：仅详情视图 -->
+        <template v-if="dialogMode === 'detail'">
+          <div class="sec-title">核保决策信息</div>
+          <el-empty v-if="!detailDec" description="该申请暂无核保决策结果" :image-size="60" />
+          <template v-else>
+            <el-descriptions :column="2" border size="small">
+              <el-descriptions-item label="核保决策唯一标识">{{ detailDec.decisionId }}</el-descriptions-item>
+              <el-descriptions-item label="投保申请编号">{{ detailDec.applicationId }}</el-descriptions-item>
+              <el-descriptions-item label="投保人编号">{{ detailDec.customerId }}</el-descriptions-item>
+              <el-descriptions-item label="年龄">{{ detailDec.age }}</el-descriptions-item>
+              <el-descriptions-item label="性别">{{ detailDec.gender }}</el-descriptions-item>
+              <el-descriptions-item label="职业类别">{{ detailDec.occupation }}</el-descriptions-item>
+              <el-descriptions-item label="年收入(元)">{{ detailDec.annualIncome }}</el-descriptions-item>
+              <el-descriptions-item label="社保">{{ detailDec.hasSocialInsurance ? '是' : '否' }}</el-descriptions-item>
+              <el-descriptions-item label="吸烟">{{ detailDec.smokingStatus }}</el-descriptions-item>
+              <el-descriptions-item label="饮酒">{{ detailDec.drinkingStatus }}</el-descriptions-item>
+              <el-descriptions-item label="BMI">{{ detailDec.bmi }}</el-descriptions-item>
+              <el-descriptions-item label="血压">{{ detailDec.bloodPressure }}</el-descriptions-item>
+              <el-descriptions-item label="个人病史">{{ detailDec.personalMedicalHistory || '无' }}</el-descriptions-item>
+              <el-descriptions-item label="家族病史" :span="2">{{ detailDec.familyMedicalHistory || '无' }}</el-descriptions-item>
+              <el-descriptions-item label="创建人">{{ detailDec.createdBy }}</el-descriptions-item>
+              <el-descriptions-item label="创建时间">{{ detailDec.createdAt }}</el-descriptions-item>
+              <el-descriptions-item label="更新时间">{{ detailDec.updatedAt }}</el-descriptions-item>
+            </el-descriptions>
+            <el-descriptions class="ai-desc" :column="2" border size="small">
+              <el-descriptions-item label="风险评分">
+                <span class="score">{{ detailDec.riskScore ?? '待预测' }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="风险等级">
+                <el-tag v-if="detailDec.riskLevel" :type="riskType(detailDec.riskLevel)" size="small">{{ detailDec.riskLevel }}</el-tag>
+                <span v-else>待预测</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="核保结论">{{ detailDec.underwritingResult ?? '待预测' }}</el-descriptions-item>
+              <el-descriptions-item label="加费比例">{{ detailDec.premiumAdjustment ?? '—' }}</el-descriptions-item>
+              <el-descriptions-item label="关键风险因子" :span="2">{{ detailDec.keyFactors ?? '待预测' }}</el-descriptions-item>
+            </el-descriptions>
+          </template>
+        </template>
+
+        <!-- 人工修整审计：仅审核视图（不含投保申请/核保决策信息） -->
+        <template v-if="dialogMode === 'review' && detailDec && audit && (audit.records?.length || audit.aiBaseline)">
+            <div class="sec-title">人工修整审计</div>
 
             <!-- 待审批：核保主管可对比 AI vs 人工 并审批 -->
             <div v-if="pendingRecord" class="review-box">
@@ -225,7 +231,6 @@
               </div>
             </div>
           </template>
-        </template>
       </template>
     </el-dialog>
 
@@ -319,6 +324,7 @@ const progressStatus = computed(() => {
   return progress.fail ? 'exception' : 'success'
 })
 const detailVisible = ref(false)
+const dialogMode = ref('detail')   // 'detail' 详情 | 'review' 审核
 const detailApp = ref(null)
 const detailDec = ref(null)
 const tableRef = ref(null)
@@ -401,11 +407,23 @@ function onPage(p) { query.pageNum = p; load() }
 function onSize(s) { query.pageSize = s; query.pageNum = 1; load() }
 
 // 详情：联合展示投保申请 + 核保决策
+// 详情：投保申请 + 核保决策（不含审核内容）
 async function openDetail(row) {
+  dialogMode.value = 'detail'
+  audit.value = null
   const res = await applicationApi.withDecision(row.applicationId)
   detailApp.value = res.data.application
   detailDec.value = res.data.decision
+  detailVisible.value = true
+}
+
+// 审核：核保决策 + 人工修整审计（不含投保申请信息）
+async function openReview(row) {
+  dialogMode.value = 'review'
   audit.value = null
+  const res = await applicationApi.withDecision(row.applicationId)
+  detailApp.value = res.data.application
+  detailDec.value = res.data.decision
   detailVisible.value = true
   if (detailDec.value?.decisionId) loadAudit(detailDec.value.decisionId)
 }

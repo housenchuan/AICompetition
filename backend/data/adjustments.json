@@ -1,4 +1,78 @@
 {
-  "aiBaseline" : { },
-  "adjustments" : { }
+  "aiBaseline" : {
+    "DEC240001" : {
+      "riskScore" : 5,
+      "riskLevel" : "标准体",
+      "underwritingResult" : "标保（标准费率承保）",
+      "premiumAdjustment" : 1,
+      "keyFactors" : "职业(+5) ｜ 19岁女性服务员，仅职业中风险，余项均正常，规则评分为标准体，建议按标准费率承保。"
+    },
+    "DEC240018" : {
+      "riskScore" : 85,
+      "riskLevel" : "高风险体",
+      "underwritingResult" : "延期承保并加费50%以上",
+      "premiumAdjustment" : 1.6,
+      "keyFactors" : "年龄(+40)、病史(+25)、血压(+15)、家族史(+5) ｜ 64岁女性，高血压病史伴轻度血压升高，家族史高风险，建议延期承保并加费50%以上。"
+    },
+    "DEC240009" : {
+      "riskScore" : 35,
+      "riskLevel" : "标准体",
+      "underwritingResult" : "标保（标准费率承保）",
+      "premiumAdjustment" : 1,
+      "keyFactors" : "吸烟(+15)、病史(+10)、BMI26.63(+5)、家族史(+5) ｜ BMI超重、吸烟、胆结石史及家族心脏病史，血压正常高值；风险可控，建议标准体按标保费率承保。"
+    }
+  },
+  "adjustments" : {
+    "DEC240009" : [ {
+      "adjustId" : "5ee44ece9af44df2b8cec9804284a155",
+      "decisionId" : "DEC240009",
+      "aiPrediction" : {
+        "riskScore" : 35,
+        "riskLevel" : "标准体",
+        "underwritingResult" : "标保（标准费率承保）",
+        "premiumAdjustment" : 1,
+        "keyFactors" : "吸烟(+15)、病史(+10)、BMI26.63(+5)、家族史(+5) ｜ 超重、吸烟、胆结石史及家族心脏病史为主要风险，血压正常高值，整体可控，建议标准体标费承保。"
+      },
+      "humanValue" : {
+        "riskScore" : 35,
+        "riskLevel" : "标准体",
+        "underwritingResult" : "标保（标准费率承保）",
+        "premiumAdjustment" : 1.1
+      },
+      "reason" : "因保险需要提高加费比例",
+      "submitRole" : "核保专员",
+      "submitAt" : "2026-09-17 11:15:10",
+      "level" : 2,
+      "approverRole" : "核保主管",
+      "status" : "已通过",
+      "reviewRole" : "核保主管",
+      "reviewAt" : "2026-09-17 11:29:12",
+      "reviewComment" : "通过"
+    }, {
+      "adjustId" : "c1031e6402a64c07ae407145f2f9de9b",
+      "decisionId" : "DEC240009",
+      "aiPrediction" : {
+        "riskScore" : 35,
+        "riskLevel" : "标准体",
+        "underwritingResult" : "标保（标准费率承保）",
+        "premiumAdjustment" : 1,
+        "keyFactors" : "吸烟(+15)、病史(+10)、BMI26.63(+5)、家族史(+5) ｜ BMI超重、吸烟、胆结石史及家族心脏病史，血压正常高值；风险可控，建议标准体按标保费率承保。"
+      },
+      "humanValue" : {
+        "riskScore" : 35,
+        "riskLevel" : "标准体",
+        "underwritingResult" : "标保（标准费率承保）",
+        "premiumAdjustment" : 1.15
+      },
+      "reason" : "需要提高加费比例",
+      "submitRole" : "核保专员",
+      "submitAt" : "2026-09-17 11:29:41",
+      "level" : 2,
+      "approverRole" : "核保主管",
+      "status" : "待审批",
+      "reviewRole" : null,
+      "reviewAt" : null,
+      "reviewComment" : null
+    } ]
+  }
 }
