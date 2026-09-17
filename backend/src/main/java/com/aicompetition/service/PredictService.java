@@ -112,6 +112,8 @@ public class PredictService {
         return results;
     }
 
+    private static final int MAX_KEY_FACTORS = 50;
+
     private String buildFactors(ScoreResult r, UnderwritingDecision d) {
         String ruleFactors = r.getKeyFactors().isEmpty() ? "无显著风险因素" : String.join("；", r.getKeyFactors());
         String summary = ruleFactors;
@@ -122,8 +124,7 @@ public class PredictService {
                 log.warn("LLM 关键因子生成失败，降级为规则拆解：{}", e.getMessage());
             }
         }
-        String breakdown = buildBreakdown(r, d);
-        return breakdown.isEmpty() ? summary : breakdown + " ｜ " + summary;
+        return summary.length() > MAX_KEY_FACTORS ? summary.substring(0, MAX_KEY_FACTORS) : summary;
     }
 
     /** 各维度加分明细：只列分值>0 的维度，按分值降序，BMI 带原始值。拒保时不列。 */

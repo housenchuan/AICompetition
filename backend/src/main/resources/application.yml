@@ -26,9 +26,9 @@ pagehelper:
 # 爱码 Chat API
 ai:
   aicoder:
-    api-key: 0cbfa790ff4d0a12a32c55d1f4d976a7a11892821c5a2acfeb66695bfd8b90cd5edbd3c719381bb330d1df349fcacc
+    api-key: 0cbfa790ff4d0a12a32c55d1f4976a7a11892821c5a5a2acfeb66695bfd8b90cd5edbd3c719381bb330d1df349fcacc
     base-url: http://wizard-ai.paic.com.cn/code_pilot/api/v1
-    model: aicoder-coder-qwen3-30b
+    model: aicoder-plus
     default-temperature: 0.7
     default-max-tokens: 4096
   # 预测时是否用 LLM 增强关键因子文本（内网爱码可达默认开；调用失败自动降级纯规则引擎）
