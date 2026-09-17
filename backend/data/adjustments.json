@@ -33,7 +33,14 @@
       "riskLevel" : "次标体B级",
       "underwritingResult" : "加费承保（加费20%~50%）或除外责任",
       "premiumAdjustment" : 1.35,
-      "keyFactors" : "29岁男性建筑工人，吸烟且肥胖，患糖尿病，职业高风险，建议加费20%~50%或除外责任承保。"
+      "keyFactors" : "病史(+30)、BMI28.47(+15)、吸烟(+15)、职业(+15) ｜ BMI肥胖；吸烟；个人病史·中度异常(+30)；职业风险高风险"
+    },
+    "f71057e24f1c4817933751b50a0252e8" : {
+      "riskScore" : 0,
+      "riskLevel" : "标准体",
+      "underwritingResult" : "标保（标准费率承保）",
+      "premiumAdjustment" : 1,
+      "keyFactors" : "无显著风险因素"
     }
   },
   "adjustments" : {
