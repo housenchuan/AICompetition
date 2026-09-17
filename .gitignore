@@ -26,3 +26,4 @@ application-local.yml
 
 # Claude Code 本地工具配置
 .claude/
+.tmp/parse_docs.py
