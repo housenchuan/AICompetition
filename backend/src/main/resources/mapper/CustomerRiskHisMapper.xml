@@ -20,7 +20,7 @@
             #{profileId}, #{customerId}, #{age}, #{gender}, #{occupation}, #{annualIncome},
             #{hasSocialInsurance}, #{smokingStatus}, #{drinkingStatus},
             #{familyMedicalHistory}, #{personalMedicalHistory}, #{bmi}, #{bloodPressure},
-            #{createdAt}, #{updatedAt}, #{target}, #{scoreV1}
+            #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, #{target}, #{scoreV1}
         )
     </insert>
 
@@ -39,7 +39,7 @@
             <if test="personalMedicalHistory != null">personal_medical_history = #{personalMedicalHistory},</if>
             <if test="bmi != null">bmi = #{bmi},</if>
             <if test="bloodPressure != null">blood_pressure = #{bloodPressure},</if>
-            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt,jdbcType=TIMESTAMP},</if>
             <if test="target != null">target = #{target},</if>
             <if test="scoreV1 != null">score_v1 = #{scoreV1},</if>
         </set>
@@ -79,10 +79,10 @@
                 <if test="q.scoreMin != null">AND score_v1 &gt;= #{q.scoreMin}</if>
                 <if test="q.scoreMax != null">AND score_v1 &lt;= #{q.scoreMax}</if>
             </if>
-            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
-            <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
-            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
-            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
+            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom,jdbcType=TIMESTAMP}</if>
+            <if test="createdTo != null">AND created_at &lt;= #{createdTo,jdbcType=TIMESTAMP}</if>
+            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom,jdbcType=TIMESTAMP}</if>
+            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo,jdbcType=TIMESTAMP}</if>
         </where>
         ORDER BY updated_at DESC NULLS LAST, profile_id
     </select>

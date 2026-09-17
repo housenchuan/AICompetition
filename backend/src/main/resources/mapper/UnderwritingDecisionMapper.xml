@@ -23,7 +23,7 @@
             #{annualIncome}, #{hasSocialInsurance}, #{smokingStatus}, #{drinkingStatus},
             #{familyMedicalHistory}, #{personalMedicalHistory}, #{bmi}, #{bloodPressure},
             #{riskScore}, #{riskLevel}, #{underwritingResult}, #{premiumAdjustment},
-            #{keyFactors}, #{createdBy}, #{createdAt}, #{updatedAt}
+            #{keyFactors}, #{createdBy}, #{createdAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}
         )
     </insert>
 
@@ -48,7 +48,7 @@
             <if test="underwritingResult != null">underwriting_result = #{underwritingResult},</if>
             <if test="premiumAdjustment != null">premium_adjustment = #{premiumAdjustment},</if>
             <if test="keyFactors != null">key_factors = #{keyFactors},</if>
-            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt,jdbcType=TIMESTAMP},</if>
         </set>
         WHERE decision_id = #{decisionId}
     </update>
@@ -60,8 +60,8 @@
             underwriting_result = #{underwritingResult},
             premium_adjustment = #{premiumAdjustment},
             key_factors        = #{keyFactors},
-            created_at         = #{createdAt},
-            updated_at         = #{updatedAt}
+            created_at         = #{createdAt,jdbcType=TIMESTAMP},
+            updated_at         = #{updatedAt,jdbcType=TIMESTAMP}
         WHERE decision_id = #{decisionId}
     </update>
 
@@ -98,10 +98,10 @@
                 <if test="q.drinkingStatus != null and q.drinkingStatus != ''">AND drinking_status = #{q.drinkingStatus}</if>
                 <if test="q.createdBy != null and q.createdBy != ''">AND created_by = #{q.createdBy}</if>
             </if>
-            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
-            <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
-            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
-            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
+            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom,jdbcType=TIMESTAMP}</if>
+            <if test="createdTo != null">AND created_at &lt;= #{createdTo,jdbcType=TIMESTAMP}</if>
+            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom,jdbcType=TIMESTAMP}</if>
+            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo,jdbcType=TIMESTAMP}</if>
         </where>
         ORDER BY updated_at DESC NULLS LAST, decision_id
     </select>
