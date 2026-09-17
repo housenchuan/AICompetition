@@ -8,7 +8,6 @@ import com.aicompetition.query.UnderwritingDecisionQuery;
 import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,10 +36,10 @@ public class UnderwritingDecisionService {
         q.setDrinkingStatus(query.getDrinkingStatus());
         q.setCreatedBy(query.getCreatedBy());
 
-        LocalDateTime createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
-        LocalDateTime createdTo = DateUtils.endOfDay(query.getCreatedTo());
-        LocalDateTime updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
-        LocalDateTime updatedTo = DateUtils.endOfDay(query.getUpdatedTo());
+        String createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
+        String createdTo   = DateUtils.endOfDay(query.getCreatedTo());
+        String updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
+        String updatedTo   = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
         List<UnderwritingDecision> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
@@ -66,7 +65,7 @@ public class UnderwritingDecisionService {
         if (entity.getDecisionId() == null || entity.getDecisionId().isEmpty()) {
             entity.setDecisionId(UUID.randomUUID().toString().replace("-", ""));
         }
-        LocalDateTime now = LocalDateTime.now();
+        String now = DateUtils.nowStr();
         if (entity.getCreatedAt() == null) entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
         if (entity.getCreatedBy() == null) entity.setCreatedBy("人工");
@@ -75,7 +74,7 @@ public class UnderwritingDecisionService {
     }
 
     public UnderwritingDecision update(UnderwritingDecision entity) {
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(DateUtils.nowStr());
         mapper.updateById(entity);
         return mapper.selectById(entity.getDecisionId());
     }

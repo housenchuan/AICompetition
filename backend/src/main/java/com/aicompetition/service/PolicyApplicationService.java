@@ -11,8 +11,6 @@ import com.aicompetition.query.PolicyApplicationQuery;
 import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +37,13 @@ public class PolicyApplicationService {
         q.setStatus(query.getStatus());
         q.setCreatedBy(query.getCreatedBy());
 
-        LocalDate dateFrom = DateUtils.parseDate(query.getDateFrom());
-        LocalDate dateTo = DateUtils.parseDate(query.getDateTo());
-        LocalDateTime createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
-        LocalDateTime createdTo = DateUtils.endOfDay(query.getCreatedTo());
-        LocalDateTime updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
-        LocalDateTime updatedTo = DateUtils.endOfDay(query.getUpdatedTo());
+        // 日期范围参数直接用 String（VARCHAR 列做字符串比较，ISO 格式可正确排序）
+        String dateFrom    = query.getDateFrom();
+        String dateTo      = query.getDateTo();
+        String createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
+        String createdTo   = DateUtils.endOfDay(query.getCreatedTo());
+        String updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
+        String updatedTo   = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
         List<PolicyApplication> list = mapper.selectList(q, dateFrom, dateTo,
@@ -58,8 +57,8 @@ public class PolicyApplicationService {
 
     /** 投保申请 + 核保决策结果 关联分页查询。 */
     public PageResult<ApplicationDecisionVO> pageWithDecision(PolicyApplicationQuery query) {
-        LocalDate dateFrom = DateUtils.parseDate(query.getDateFrom());
-        LocalDate dateTo = DateUtils.parseDate(query.getDateTo());
+        String dateFrom = query.getDateFrom();
+        String dateTo   = query.getDateTo();
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
         List<ApplicationDecisionVO> list = mapper.selectListWithDecision(query, dateFrom, dateTo);
         return PageResult.of(list);
@@ -79,7 +78,7 @@ public class PolicyApplicationService {
         if (entity.getProfileId() == null || entity.getProfileId().isEmpty()) {
             entity.setProfileId(UUID.randomUUID().toString().replace("-", ""));
         }
-        LocalDateTime now = LocalDateTime.now();
+        String now = DateUtils.nowStr();
         if (entity.getCreatedAt() == null) entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
         if (entity.getCreatedBy() == null) entity.setCreatedBy("人工");
@@ -89,7 +88,7 @@ public class PolicyApplicationService {
     }
 
     public PolicyApplication update(PolicyApplication entity) {
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(DateUtils.nowStr());
         mapper.updateById(entity);
         return mapper.selectById(entity.getProfileId());
     }

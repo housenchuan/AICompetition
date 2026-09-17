@@ -8,7 +8,6 @@ import com.aicompetition.query.CustomerRiskHisQuery;
 import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,10 +32,10 @@ public class CustomerRiskHisService {
         q.setTarget(query.getTarget());
         q.setBloodPressure(query.getBloodPressure());
 
-        LocalDateTime createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
-        LocalDateTime createdTo = DateUtils.endOfDay(query.getCreatedTo());
-        LocalDateTime updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
-        LocalDateTime updatedTo = DateUtils.endOfDay(query.getUpdatedTo());
+        String createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
+        String createdTo   = DateUtils.endOfDay(query.getCreatedTo());
+        String updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
+        String updatedTo   = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
         List<CustomerRiskHis> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
@@ -51,7 +50,7 @@ public class CustomerRiskHisService {
         if (entity.getProfileId() == null || entity.getProfileId().isEmpty()) {
             entity.setProfileId(UUID.randomUUID().toString().replace("-", ""));
         }
-        LocalDateTime now = LocalDateTime.now();
+        String now = DateUtils.nowStr();
         if (entity.getCreatedAt() == null) entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
         mapper.insert(entity);
@@ -59,7 +58,7 @@ public class CustomerRiskHisService {
     }
 
     public CustomerRiskHis update(CustomerRiskHis entity) {
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(DateUtils.nowStr());
         mapper.updateById(entity);
         return mapper.selectById(entity.getProfileId());
     }

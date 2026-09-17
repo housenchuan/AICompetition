@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS customer_risk_his (
     personal_medical_history TEXT,
     bmi                      DECIMAL(5,2),
     blood_pressure           VARCHAR(20),
-    created_at               TIMESTAMP,
-    updated_at               TIMESTAMP,
+    created_at               VARCHAR(30),
+    updated_at               VARCHAR(30),
     target                   INT,
     score_v1                 INT,
     CONSTRAINT uk_customer_risk_his_customer UNIQUE (customer_id)
@@ -60,11 +60,11 @@ CREATE TABLE IF NOT EXISTS policy_applications (
     insurance_period         VARCHAR(20),
     waiting_period           INT,
     beneficiary_relationship VARCHAR(50),
-    application_date         DATE,
+    application_date         VARCHAR(20),
     status                   VARCHAR(20),
     created_by               VARCHAR(20),
-    created_at               TIMESTAMP,
-    updated_at               TIMESTAMP
+    created_at               VARCHAR(30),
+    updated_at               VARCHAR(30)
 );
 
 COMMENT ON TABLE  policy_applications                          IS '投保申请记录表';
@@ -110,8 +110,8 @@ CREATE TABLE IF NOT EXISTS underwriting_decisions (
     premium_adjustment       DECIMAL(5,2),
     key_factors              TEXT,
     created_by               VARCHAR(20),
-    created_at               TIMESTAMP,
-    updated_at               TIMESTAMP
+    created_at               VARCHAR(30),
+    updated_at               VARCHAR(30)
 );
 
 COMMENT ON TABLE  underwriting_decisions                          IS '核保决策画像分析结果表';

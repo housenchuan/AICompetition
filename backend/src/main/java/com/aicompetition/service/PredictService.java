@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.aicompetition.common.DateUtils;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,9 +68,9 @@ public class PredictService {
         d.setKeyFactors(buildFactors(r, d));
         // 创建时间为空（预测前未落库）则补为当前时间；已有则保持原值
         if (d.getCreatedAt() == null) {
-            d.setCreatedAt(LocalDateTime.now());
+            d.setCreatedAt(DateUtils.nowStr());
         }
-        d.setUpdatedAt(LocalDateTime.now());
+        d.setUpdatedAt(DateUtils.nowStr());
         decisionMapper.updatePrediction(d);
         UnderwritingDecision saved = decisionMapper.selectById(decisionId);
         // 备份本次 AI 预测结果（供审核对比、永久保留，不受后续人工覆写影响）
@@ -88,10 +88,13 @@ public class PredictService {
         if (cfg == null || !cfg.path("reject").asBoolean(false)) return false;
         PolicyApplication cur = policyApplicationMapper.selectById(d.getApplicationId());
         if (cur == null || cur.getApplicationDate() == null) return false;
-        LocalDate refDate = cur.getApplicationDate();
+        // applicationDate 为 VARCHAR "yyyy-MM-dd"，临时转 LocalDate 做日期算术
+        LocalDate refDate = DateUtils.parseDate(cur.getApplicationDate());
+        if (refDate == null) return false;
         LocalDate from = refDate.minusMonths(cfg.path("months").asInt(6));
         int cnt = policyApplicationMapper.countRecentRejections(
-                d.getCustomerId(), cfg.path("status").asText("已拒保"), from, refDate, d.getApplicationId());
+                d.getCustomerId(), cfg.path("status").asText("已拒保"),
+                DateUtils.formatDate(from), DateUtils.formatDate(refDate), d.getApplicationId());
         return cnt > 0;
     }
 
