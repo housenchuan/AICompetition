@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -57,10 +59,10 @@ class PredictServiceTest {
         UnderwritingDecision d = healthyDecision();
         when(decisionMapper.selectById("D999")).thenReturn(d);
         PolicyApplication cur = new PolicyApplication();
-        cur.setApplicationDate("2024-09-01");
+        cur.setApplicationDate(LocalDate.of(2024, 9, 1));
         when(policyApplicationMapper.selectById("A999")).thenReturn(cur);
         when(policyApplicationMapper.countRecentRejections(eq("C999"), eq("已拒保"),
-                eq("2024-03-01"), eq("2024-09-01"), eq("A999"))).thenReturn(1);
+                eq(LocalDate.of(2024, 3, 1)), eq(LocalDate.of(2024, 9, 1)), eq("A999"))).thenReturn(1);
 
         service.predictOne("D999");
 
@@ -74,7 +76,7 @@ class PredictServiceTest {
         UnderwritingDecision d = healthyDecision();
         when(decisionMapper.selectById("D999")).thenReturn(d);
         PolicyApplication cur = new PolicyApplication();
-        cur.setApplicationDate("2024-09-01");
+        cur.setApplicationDate(LocalDate.of(2024, 9, 1));
         when(policyApplicationMapper.selectById("A999")).thenReturn(cur);
         when(policyApplicationMapper.countRecentRejections(any(), any(), any(), any(), any())).thenReturn(0);
 
@@ -99,7 +101,7 @@ class PredictServiceTest {
     @Test
     void 创建时间已有_预测时保持不变() {
         UnderwritingDecision d = healthyDecision();
-        String existing = "2024-01-01 10:00:00";
+        LocalDateTime existing = LocalDateTime.of(2024, 1, 1, 10, 0, 0);
         d.setCreatedAt(existing);
         when(decisionMapper.selectById("D999")).thenReturn(d);
         when(policyApplicationMapper.selectById("A999")).thenReturn(new PolicyApplication());

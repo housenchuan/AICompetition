@@ -22,7 +22,11 @@ public class LocalDateTypeHandler extends BaseTypeHandler<LocalDate> {
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, LocalDate parameter, JdbcType jdbcType)
             throws SQLException {
-        ps.setString(i, parameter.format(FMT));
+        if (jdbcType == JdbcType.VARCHAR) {
+            ps.setString(i, parameter.format(FMT));
+        } else {
+            ps.setDate(i, Date.valueOf(parameter));
+        }
     }
 
     @Override
