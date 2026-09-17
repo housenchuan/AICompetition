@@ -17,7 +17,7 @@ public class WebClientConfig {
         // 显式超时：连接 5s、响应（收到完整响应）15s；命中即抛错，由调用方 catch 自动降级。
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofSeconds(15));
+                .responseTimeout(Duration.ofSeconds(75));
 
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))

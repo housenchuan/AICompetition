@@ -95,7 +95,7 @@ public class NlSqlService {
 
     private String generateSql(String question) {
         String sys = "你是 PostgreSQL 数据分析专家。根据表结构把用户的中文统计问题转成一条 SELECT 语句，"
-                + "只输出 SQL 本身，不要 markdown，不要分号结尾，不要解释。";
+                + "只输出 SQL 本身，不要 markdown，不要分号结尾，不要中括号，不要解释。";
         String user = """
                 数据库为 PostgreSQL，三张业务表（只读）：
                 1. customer_risk_his 历史客户风险画像表：profile_id 画像唯一标识, customer_id 投保人编号, age 年龄, gender 性别(男/女), occupation 职业, annual_income 年收入, has_social_insurance 是否有社保(boolean), smoking_status 吸烟状况(是/否/已戒烟), drinking_status 饮酒状况(是/否/偶尔), family_medical_history 家族病史(如 无/无特殊病史/高血压/糖尿病/脑血管疾病/心脏病/恶性肿瘤 或顿号组合), personal_medical_history 个人病史(如 无/颈椎病/脂肪肝/高血压/糖尿病/甲状腺结节/胃炎/胆结石/乙肝病毒携带/腰椎间盘突出 或组合), bmi 体重指数, blood_pressure 血压(正常/正常高值/临界高血压/轻度高血压/中度高血压), created_at/updated_at 时间戳, target 是否理赔(1有理赔/0无理赔), score_v1 第一版风险评分。
@@ -109,11 +109,11 @@ public class NlSqlService {
                 - 统计类问题用聚合函数（count/sum/avg/max/min），比率用 count(*) FILTER (WHERE ...) * 100.0 / count(*) 之类表达，列别名用中文；
                 - 时间口径默认用 created_at（申请/画像/决策的创建时间）；"2025年6月" 即 created_at >= '2025-06-01' AND created_at < '2025-07-01'；申请业务日期可用 application_date；
                 - "通过率"指 status='已通过' 的占比；"风险分布"按 risk_level 分组；"已通过核保的人员数据"为明细查询；
-                - 结果加 ORDER BY，明细类查询加 LIMIT 200；
+                - 结果加 ORDER BY；
                 - 输出一条以 SELECT 开头的 SQL（不要使用 WITH/CTE），不要分号，不要解释。""".formatted(question);
 
         // 推理类模型（如 DeepSeek）会先输出思考过程再给答案，max_tokens 需留足余量
-        ChatResponse resp = aiService.chat(List.of(ChatMessage.system(sys), ChatMessage.user(user)), 0.0, 4096)
+        ChatResponse resp = aiService.chat(List.of(ChatMessage.system(sys), ChatMessage.user(user)), 0.0, 1024)
                 .block(java.time.Duration.ofSeconds(60));
         String content = resp != null && resp.getChoices() != null && !resp.getChoices().isEmpty()
                 ? resp.getChoices().get(0).getMessage().getContent() : null;
