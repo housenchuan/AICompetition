@@ -19,7 +19,7 @@
       "riskLevel" : "标准体",
       "underwritingResult" : "标保（标准费率承保）",
       "premiumAdjustment" : 1,
-      "keyFactors" : "吸烟(+15)、病史(+10)、BMI26.63(+5)、家族史(+5) ｜ BMI超重、吸烟、胆结石史及家族心脏病史，血压正常高值；风险可控，建议标准体按标保费率承保。"
+      "keyFactors" : "吸烟(+15)、病史(+10)、BMI26.63(+5)、家族史(+5) ｜ BMI超重；吸烟；个人病史·轻度异常(+10)；家族病史中风险"
     }
   },
   "adjustments" : {
@@ -73,6 +73,32 @@
       "reviewRole" : null,
       "reviewAt" : null,
       "reviewComment" : null
+    } ],
+    "36e2fcf51a4548d685bd8b9f69a23197" : [ {
+      "adjustId" : "3d7c63d558ab41fa994c351c5fcdeed4",
+      "decisionId" : "36e2fcf51a4548d685bd8b9f69a23197",
+      "aiPrediction" : {
+        "riskScore" : 10,
+        "riskLevel" : "标准体",
+        "underwritingResult" : "标保（标准费率承保）",
+        "premiumAdjustment" : 1,
+        "keyFactors" : "无高危因素"
+      },
+      "humanValue" : {
+        "riskScore" : 15,
+        "riskLevel" : "标准体",
+        "underwritingResult" : "标保（标准费率承保）",
+        "premiumAdjustment" : 1
+      },
+      "reason" : "手动复核：无异常",
+      "submitRole" : "核保专员",
+      "submitAt" : "2026-09-17 13:57:54",
+      "level" : 2,
+      "approverRole" : "核保主管",
+      "status" : "已通过",
+      "reviewRole" : "核保主管",
+      "reviewAt" : "2026-09-17 13:57:54",
+      "reviewComment" : "审批通过：复核正确"
     } ]
   }
 }
