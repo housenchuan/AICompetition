@@ -1,12 +1,8 @@
 package com.aicompetition.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-/**
- * 核保决策画像分析结果表 underwriting_decisions
- * 其中 riskScore/riskLevel/underwritingResult/premiumAdjustment/keyFactors 为 AI 生成字段。
- * createdAt/updatedAt 对应数据库 VARCHAR 列，用 String 存储。
- */
 public class UnderwritingDecision {
 
     private String decisionId;
@@ -29,8 +25,8 @@ public class UnderwritingDecision {
     private BigDecimal premiumAdjustment;
     private String keyFactors;
     private String createdBy;
-    private String createdAt;   // VARCHAR(30) "yyyy-MM-dd HH:mm:ss"
-    private String updatedAt;   // VARCHAR(30) "yyyy-MM-dd HH:mm:ss"
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     /** 非持久化：人工修整状态标签（待审批/已生效/已驳回），由 AdjustmentService 合并填充，不入库。 */
     private String adjustStatus;
@@ -98,9 +94,9 @@ public class UnderwritingDecision {
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public String getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

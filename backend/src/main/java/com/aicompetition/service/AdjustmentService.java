@@ -176,7 +176,7 @@ public class AdjustmentService {
         if (human.hasNonNull("riskLevel")) u.setRiskLevel(human.get("riskLevel").asText());
         if (human.hasNonNull("underwritingResult")) u.setUnderwritingResult(human.get("underwritingResult").asText());
         if (human.hasNonNull("premiumAdjustment")) u.setPremiumAdjustment(human.get("premiumAdjustment").decimalValue());
-        u.setUpdatedAt(LocalDateTime.now().format(TS));
+        u.setUpdatedAt(LocalDateTime.now());
         decisionMapper.updateById(u);
     }
 

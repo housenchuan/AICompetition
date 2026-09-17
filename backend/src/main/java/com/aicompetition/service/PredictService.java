@@ -68,9 +68,9 @@ public class PredictService {
         d.setKeyFactors(buildFactors(r, d));
         // 创建时间为空（预测前未落库）则补为当前时间；已有则保持原值
         if (d.getCreatedAt() == null) {
-            d.setCreatedAt(DateUtils.nowStr());
+            d.setCreatedAt(DateUtils.now());
         }
-        d.setUpdatedAt(DateUtils.nowStr());
+        d.setUpdatedAt(DateUtils.now());
         decisionMapper.updatePrediction(d);
         UnderwritingDecision saved = decisionMapper.selectById(decisionId);
         // 备份本次 AI 预测结果（供审核对比、永久保留，不受后续人工覆写影响）
@@ -88,13 +88,11 @@ public class PredictService {
         if (cfg == null || !cfg.path("reject").asBoolean(false)) return false;
         PolicyApplication cur = policyApplicationMapper.selectById(d.getApplicationId());
         if (cur == null || cur.getApplicationDate() == null) return false;
-        // applicationDate 为 VARCHAR "yyyy-MM-dd"，临时转 LocalDate 做日期算术
-        LocalDate refDate = DateUtils.parseDate(cur.getApplicationDate());
-        if (refDate == null) return false;
+        LocalDate refDate = cur.getApplicationDate();
         LocalDate from = refDate.minusMonths(cfg.path("months").asInt(6));
         int cnt = policyApplicationMapper.countRecentRejections(
                 d.getCustomerId(), cfg.path("status").asText("已拒保"),
-                DateUtils.formatDate(from), DateUtils.formatDate(refDate), d.getApplicationId());
+                from, refDate, d.getApplicationId());
         return cnt > 0;
     }
 
@@ -112,8 +110,6 @@ public class PredictService {
         return results;
     }
 
-    private static final int MAX_KEY_FACTORS = 50;
-
     private String buildFactors(ScoreResult r, UnderwritingDecision d) {
         String ruleFactors = r.getKeyFactors().isEmpty() ? "无显著风险因素" : String.join("；", r.getKeyFactors());
         String summary = ruleFactors;
@@ -124,7 +120,8 @@ public class PredictService {
                 log.warn("LLM 关键因子生成失败，降级为规则拆解：{}", e.getMessage());
             }
         }
-        return summary.length() > MAX_KEY_FACTORS ? summary.substring(0, MAX_KEY_FACTORS) : summary;
+        String breakdown = buildBreakdown(r, d);
+        return breakdown.isEmpty() ? summary : breakdown + " ｜ " + summary;
     }
 
     /** 各维度加分明细：只列分值>0 的维度，按分值降序，BMI 带原始值。拒保时不列。 */
@@ -160,7 +157,7 @@ public class PredictService {
     }
 
     private String llmFactors(ScoreResult r, UnderwritingDecision d, String ruleFactors) {
-        String sys = "你是资深保险核保专家。根据投保人画像与规则评分结果，用一句话（不超过 60 字）概括关键风险因子与核保建议，直接给结论，不要解释过程。";
+        String sys = "你是资深保险核保专家。根据投保人画像与规则评分结果，用一句话概括关键风险因子与核保建议，直接给结论，不要解释过程。";
         String user = String.format(
                 "画像：年龄%s，性别%s，职业%s，BMI%s，血压%s，吸烟%s，饮酒%s，个人病史[%s]，家族病史[%s]。" +
                         "规则评分：总分%d，等级%s，结论%s。规则命中因子：%s。",

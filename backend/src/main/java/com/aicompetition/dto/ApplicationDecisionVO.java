@@ -1,11 +1,9 @@
 package com.aicompetition.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-/**
- * 投保申请 + 核保决策结果 关联查询视图对象（列表用）。
- * 申请字段来自 policy_applications，AI 决策字段来自关联的 underwriting_decisions（LEFT JOIN，可能为空）。
- */
 public class ApplicationDecisionVO {
 
     // ===== 投保申请字段 =====
@@ -19,11 +17,11 @@ public class ApplicationDecisionVO {
     private String insurancePeriod;
     private Integer waitingPeriod;
     private String beneficiaryRelationship;
-    private String applicationDate;
+    private LocalDate applicationDate;
     private String status;
     private String createdBy;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // ===== 关联的核保决策字段（可能为 null）=====
     private String decisionId;
@@ -63,8 +61,8 @@ public class ApplicationDecisionVO {
     public String getBeneficiaryRelationship() { return beneficiaryRelationship; }
     public void setBeneficiaryRelationship(String beneficiaryRelationship) { this.beneficiaryRelationship = beneficiaryRelationship; }
 
-    public String getApplicationDate() { return applicationDate; }
-    public void setApplicationDate(String applicationDate) { this.applicationDate = applicationDate; }
+    public LocalDate getApplicationDate() { return applicationDate; }
+    public void setApplicationDate(LocalDate applicationDate) { this.applicationDate = applicationDate; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
@@ -72,11 +70,11 @@ public class ApplicationDecisionVO {
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public String getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public String getDecisionId() { return decisionId; }
     public void setDecisionId(String decisionId) { this.decisionId = decisionId; }

@@ -8,6 +8,7 @@ import com.aicompetition.query.UnderwritingDecisionQuery;
 import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,10 +37,10 @@ public class UnderwritingDecisionService {
         q.setDrinkingStatus(query.getDrinkingStatus());
         q.setCreatedBy(query.getCreatedBy());
 
-        String createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
-        String createdTo   = DateUtils.endOfDay(query.getCreatedTo());
-        String updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
-        String updatedTo   = DateUtils.endOfDay(query.getUpdatedTo());
+        LocalDateTime createdFrom = DateUtils.startOfDay(query.getCreatedFrom());
+        LocalDateTime createdTo   = DateUtils.endOfDay(query.getCreatedTo());
+        LocalDateTime updatedFrom = DateUtils.startOfDay(query.getUpdatedFrom());
+        LocalDateTime updatedTo   = DateUtils.endOfDay(query.getUpdatedTo());
 
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
         List<UnderwritingDecision> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
@@ -65,7 +66,7 @@ public class UnderwritingDecisionService {
         if (entity.getDecisionId() == null || entity.getDecisionId().isEmpty()) {
             entity.setDecisionId(UUID.randomUUID().toString().replace("-", ""));
         }
-        String now = DateUtils.nowStr();
+        LocalDateTime now = DateUtils.now();
         if (entity.getCreatedAt() == null) entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
         if (entity.getCreatedBy() == null) entity.setCreatedBy("人工");
@@ -78,7 +79,7 @@ public class UnderwritingDecisionService {
         if (existing == null || !"人工".equals(existing.getCreatedBy())) {
             throw new IllegalArgumentException("系统生成的记录不允许手动编辑");
         }
-        entity.setUpdatedAt(DateUtils.nowStr());
+        entity.setUpdatedAt(DateUtils.now());
         mapper.updateById(entity);
         return mapper.selectById(entity.getDecisionId());
     }

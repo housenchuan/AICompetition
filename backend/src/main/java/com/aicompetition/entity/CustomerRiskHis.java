@@ -1,11 +1,8 @@
 package com.aicompetition.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-/**
- * 历史客户风险画像分析表 customer_risk_his
- * createdAt/updatedAt 对应数据库 VARCHAR 列，用 String 存储。
- */
 public class CustomerRiskHis {
 
     private String profileId;
@@ -21,8 +18,8 @@ public class CustomerRiskHis {
     private String personalMedicalHistory;
     private BigDecimal bmi;
     private String bloodPressure;
-    private String createdAt;   // VARCHAR(30) "yyyy-MM-dd HH:mm:ss"
-    private String updatedAt;   // VARCHAR(30) "yyyy-MM-dd HH:mm:ss"
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Integer target;
     private Integer scoreV1;
 
@@ -65,11 +62,11 @@ public class CustomerRiskHis {
     public String getBloodPressure() { return bloodPressure; }
     public void setBloodPressure(String bloodPressure) { this.bloodPressure = bloodPressure; }
 
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public String getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public Integer getTarget() { return target; }
     public void setTarget(Integer target) { this.target = target; }

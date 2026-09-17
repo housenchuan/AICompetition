@@ -10,6 +10,8 @@ import com.aicompetition.mapper.UnderwritingDecisionMapper;
 import com.aicompetition.query.AggregateQuery;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,8 +37,8 @@ public class StatService {
     }
 
     public Map<String, Object> overview(String dateFrom, String dateTo) {
-        List<PolicyApplication> apps = applicationMapper.selectList(new PolicyApplication(), dateFrom, dateTo,
-                null, null, null, null);
+        List<PolicyApplication> apps = applicationMapper.selectList(new PolicyApplication(),
+                DateUtils.parseDate(dateFrom), DateUtils.parseDate(dateTo), null, null, null, null);
         List<UnderwritingDecision> decs = decisionMapper.selectList(new UnderwritingDecision(), null, null, null, null);
 
         int appTotal = apps.size();
@@ -83,20 +85,18 @@ public class StatService {
         Map<String, Function<Object, String>> extractors = new LinkedHashMap<>();
 
         if ("policy_applications".equals(entity)) {
-            // 统一按创建时间(created_at)过滤；日期参数为 String，VARCHAR 列字符串比较
-            String from = DateUtils.startOfDay(q.getDateFrom());
-            String to   = DateUtils.endOfDay(q.getDateTo());
+            LocalDateTime from = DateUtils.startOfDay(q.getDateFrom());
+            LocalDateTime to   = DateUtils.endOfDay(q.getDateTo());
             for (PolicyApplication a : applicationMapper.selectList(new PolicyApplication(), null, null, from, to, null, null)) rows.add(a);
             extractors.put("productType", o -> ((PolicyApplication) o).getProductType());
             extractors.put("status", o -> ((PolicyApplication) o).getStatus());
             extractors.put("paymentFrequency", o -> ((PolicyApplication) o).getPaymentFrequency());
             extractors.put("createdBy", o -> ((PolicyApplication) o).getCreatedBy());
             extractors.put("customerId", o -> ((PolicyApplication) o).getCustomerId());
-            // createdAt 为 "yyyy-MM-dd HH:mm:ss"，取前7位得 "yyyy-MM"
-            extractors.put("month", o -> { String d = ((PolicyApplication) o).getCreatedAt(); return d != null && d.length() >= 7 ? d.substring(0, 7) : null; });
+            extractors.put("month", o -> { LocalDateTime dt = ((PolicyApplication) o).getCreatedAt(); return dt == null ? null : String.format("%d-%02d", dt.getYear(), dt.getMonthValue()); });
         } else if ("customer_risk_his".equals(entity)) {
-            String from = DateUtils.startOfDay(q.getDateFrom());
-            String to   = DateUtils.endOfDay(q.getDateTo());
+            LocalDateTime from = DateUtils.startOfDay(q.getDateFrom());
+            LocalDateTime to   = DateUtils.endOfDay(q.getDateTo());
             for (CustomerRiskHis c : customerRiskHisMapper.selectList(new com.aicompetition.query.CustomerRiskHisQuery(), from, to, null, null)) rows.add(c);
             extractors.put("gender", o -> ((CustomerRiskHis) o).getGender());
             extractors.put("occupation", o -> ((CustomerRiskHis) o).getOccupation());
@@ -105,10 +105,10 @@ public class StatService {
             extractors.put("hasSocialInsurance", o -> boolLabel(((CustomerRiskHis) o).getHasSocialInsurance()));
             extractors.put("target", o -> claimLabel(((CustomerRiskHis) o).getTarget()));
             extractors.put("customerId", o -> ((CustomerRiskHis) o).getCustomerId());
-            extractors.put("month", o -> { String d = ((CustomerRiskHis) o).getCreatedAt(); return d != null && d.length() >= 7 ? d.substring(0, 7) : null; });
+            extractors.put("month", o -> { LocalDateTime dt = ((CustomerRiskHis) o).getCreatedAt(); return dt == null ? null : String.format("%d-%02d", dt.getYear(), dt.getMonthValue()); });
         } else if ("underwriting_decisions".equals(entity)) {
-            String from = DateUtils.startOfDay(q.getDateFrom());
-            String to   = DateUtils.endOfDay(q.getDateTo());
+            LocalDateTime from = DateUtils.startOfDay(q.getDateFrom());
+            LocalDateTime to   = DateUtils.endOfDay(q.getDateTo());
             for (UnderwritingDecision d : decisionMapper.selectList(new UnderwritingDecision(), from, to, null, null)) rows.add(d);
             extractors.put("riskLevel", o -> ((UnderwritingDecision) o).getRiskLevel());
             extractors.put("underwritingResult", o -> ((UnderwritingDecision) o).getUnderwritingResult());
@@ -118,7 +118,7 @@ public class StatService {
             extractors.put("drinkingStatus", o -> ((UnderwritingDecision) o).getDrinkingStatus());
             extractors.put("hasSocialInsurance", o -> boolLabel(((UnderwritingDecision) o).getHasSocialInsurance()));
             extractors.put("customerId", o -> ((UnderwritingDecision) o).getCustomerId());
-            extractors.put("month", o -> { String d = ((UnderwritingDecision) o).getCreatedAt(); return d != null && d.length() >= 7 ? d.substring(0, 7) : null; });
+            extractors.put("month", o -> { LocalDateTime dt = ((UnderwritingDecision) o).getCreatedAt(); return dt == null ? null : String.format("%d-%02d", dt.getYear(), dt.getMonthValue()); });
         } else {
             throw new IllegalArgumentException("不支持的数据源: " + entity);
         }

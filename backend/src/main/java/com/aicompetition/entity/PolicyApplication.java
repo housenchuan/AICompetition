@@ -1,11 +1,9 @@
 package com.aicompetition.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-/**
- * 投保申请记录表 policy_applications
- * 日期字段（applicationDate/createdAt/updatedAt）对应数据库 VARCHAR 列，用 String 存储。
- */
 public class PolicyApplication {
 
     private String profileId;
@@ -18,11 +16,11 @@ public class PolicyApplication {
     private String insurancePeriod;
     private Integer waitingPeriod;
     private String beneficiaryRelationship;
-    private String applicationDate;   // VARCHAR(20) "yyyy-MM-dd"
+    private LocalDate applicationDate;
     private String status;
     private String createdBy;
-    private String createdAt;         // VARCHAR(30) "yyyy-MM-dd HH:mm:ss"
-    private String updatedAt;         // VARCHAR(30) "yyyy-MM-dd HH:mm:ss"
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public String getProfileId() { return profileId; }
     public void setProfileId(String profileId) { this.profileId = profileId; }
@@ -54,8 +52,8 @@ public class PolicyApplication {
     public String getBeneficiaryRelationship() { return beneficiaryRelationship; }
     public void setBeneficiaryRelationship(String beneficiaryRelationship) { this.beneficiaryRelationship = beneficiaryRelationship; }
 
-    public String getApplicationDate() { return applicationDate; }
-    public void setApplicationDate(String applicationDate) { this.applicationDate = applicationDate; }
+    public LocalDate getApplicationDate() { return applicationDate; }
+    public void setApplicationDate(LocalDate applicationDate) { this.applicationDate = applicationDate; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
@@ -63,9 +61,9 @@ public class PolicyApplication {
     public String getCreatedBy() { return createdBy; }
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
-    public String getCreatedAt() { return createdAt; }
-    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public String getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
