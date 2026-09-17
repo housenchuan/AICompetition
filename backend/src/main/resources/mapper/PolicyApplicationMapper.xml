@@ -60,8 +60,8 @@
         WHERE customer_id = #{customerId}
           AND status = #{status}
           AND profile_id != #{excludeProfileId}
-          AND application_date::text &gt;= #{dateFrom}
-          AND application_date::text &lt;= #{dateTo}
+          AND application_date &gt;= #{dateFrom}
+          AND application_date &lt;= #{dateTo}
     </select>
 
     <select id="selectList" resultType="com.aicompetition.entity.PolicyApplication">
@@ -77,12 +77,12 @@
                 <if test="q.status != null and q.status != ''">AND status = #{q.status}</if>
                 <if test="q.createdBy != null and q.createdBy != ''">AND created_by = #{q.createdBy}</if>
             </if>
-            <if test="dateFrom != null">AND application_date::text &gt;= #{dateFrom}</if>
-            <if test="dateTo != null">AND application_date::text &lt;= #{dateTo}</if>
-            <if test="createdFrom != null">AND created_at::text &gt;= #{createdFrom}</if>
-            <if test="createdTo != null">AND created_at::text &lt;= #{createdTo}</if>
-            <if test="updatedFrom != null">AND updated_at::text &gt;= #{updatedFrom}</if>
-            <if test="updatedTo != null">AND updated_at::text &lt;= #{updatedTo}</if>
+            <if test="dateFrom != null">AND application_date &gt;= #{dateFrom}</if>
+            <if test="dateTo != null">AND application_date &lt;= #{dateTo}</if>
+            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
+            <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
+            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
+            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
         </where>
         ORDER BY updated_at DESC NULLS LAST, profile_id
     </select>
@@ -108,8 +108,8 @@
                 <if test="q.createdBy != null and q.createdBy != ''">AND pa.created_by = #{q.createdBy}</if>
                 <if test="q.riskLevel != null and q.riskLevel != ''">AND ud.risk_level = #{q.riskLevel}</if>
             </if>
-            <if test="dateFrom != null">AND pa.application_date::text &gt;= #{dateFrom}</if>
-            <if test="dateTo != null">AND pa.application_date::text &lt;= #{dateTo}</if>
+            <if test="dateFrom != null">AND pa.application_date &gt;= #{dateFrom}</if>
+            <if test="dateTo != null">AND pa.application_date &lt;= #{dateTo}</if>
         </where>
         ORDER BY pa.updated_at DESC NULLS LAST, pa.profile_id
     </select>

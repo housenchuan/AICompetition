@@ -71,10 +71,10 @@
                 <if test="q.target != null">AND target = #{q.target}</if>
                 <if test="q.bloodPressure != null and q.bloodPressure != ''">AND blood_pressure = #{q.bloodPressure}</if>
             </if>
-            <if test="createdFrom != null">AND created_at::text &gt;= #{createdFrom}</if>
-            <if test="createdTo != null">AND created_at::text &lt;= #{createdTo}</if>
-            <if test="updatedFrom != null">AND updated_at::text &gt;= #{updatedFrom}</if>
-            <if test="updatedTo != null">AND updated_at::text &lt;= #{updatedTo}</if>
+            <if test="createdFrom != null">AND created_at &gt;= #{createdFrom}</if>
+            <if test="createdTo != null">AND created_at &lt;= #{createdTo}</if>
+            <if test="updatedFrom != null">AND updated_at &gt;= #{updatedFrom}</if>
+            <if test="updatedTo != null">AND updated_at &lt;= #{updatedTo}</if>
         </where>
         ORDER BY updated_at DESC NULLS LAST, profile_id
     </select>
