@@ -90,8 +90,8 @@
 
     <!-- 三/四维：扁平组合表 -->
     <div v-else-if="result && result.groups" class="page-card">
-      <div class="sec-title">{{ result.dims.map(dimLabel).join(' × ') }} 组合统计（共 {{ result.total }} 条）</div>
-      <el-table :data="result.groups" border stripe size="small" max-height="480">
+      <div class="sec-title">{{ result.dims.map(dimLabel).join(' × ') }} 组合统计（共 {{ result.total }} 条 · {{ result.groups.length }} 种组合）</div>
+      <el-table :data="result.groups" border stripe size="small">
         <el-table-column type="index" label="序号" width="56" />
         <el-table-column v-for="(d, i) in result.dims" :key="d" :label="dimLabel(d)" min-width="110">
           <template #default="{ row }">{{ row.keys[i] }}</template>
@@ -120,6 +120,7 @@ const result = ref(null)
 const chartType = ref('bar')
 const chartEl = ref(null)
 let chart = null
+
 
 const ENTITIES = [
   { label: '投保申请记录', value: 'policy_applications' },
