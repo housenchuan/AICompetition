@@ -112,6 +112,16 @@ public class RuleSuggestionService {
         throw new IllegalArgumentException("规则建议不存在：" + id);
     }
 
+    /** 已生成过规则建议的反馈 id 列表（供前端隐藏「转规则建议」按钮，避免重复转）。 */
+    public synchronized java.util.List<String> convertedFeedbackIds() {
+        java.util.LinkedHashSet<String> set = new java.util.LinkedHashSet<>();
+        for (JsonNode n : list) {
+            String fid = n.path("fromFeedbackId").asText(null);
+            if (fid != null && !fid.isEmpty()) set.add(fid);
+        }
+        return new java.util.ArrayList<>(set);
+    }
+
     /** 列表（可按状态过滤，最新在前）。 */
     public synchronized ArrayNode listAll(String status) {
         ArrayNode out = om.createArrayNode();

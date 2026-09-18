@@ -41,7 +41,8 @@ export const ruleSuggestionApi = {
   fromFeedback: (feedbackId, data) => request.post(`/api/rule-suggestions/from-feedback/${feedbackId}`, data || {}),
   list: (data) => request.post('/api/rule-suggestions/list', data || {}),
   review: (id, data) => request.post(`/api/rule-suggestions/${id}/review`, data),
-  stats: () => request.post('/api/rule-suggestions/stats')
+  stats: () => request.post('/api/rule-suggestions/stats'),
+  feedbackIds: () => request.post('/api/rule-suggestions/feedback-ids')
 }
 
 // 风险计分规则 + 规则引擎

@@ -57,4 +57,10 @@ public class RuleSuggestionController {
     public Result<Map<String, Object>> stats() {
         return Result.ok(service.stats());
     }
+
+    /** 已转过规则建议的反馈 id 列表（前端据此隐藏「转规则建议」按钮）。 */
+    @PostMapping("/feedback-ids")
+    public Result<java.util.List<String>> feedbackIds() {
+        return Result.ok(service.convertedFeedbackIds());
+    }
 }

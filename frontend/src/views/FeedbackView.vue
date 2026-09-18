@@ -363,10 +363,20 @@ function onSubmitted() {
 const suggestVisible = ref(false)
 const suggestions = ref([])
 const sugStats = ref({})
+const convertedIds = ref(new Set())   // 已转过规则建议的反馈 id，用于隐藏按钮
 
-// 「误判申诉 / 规则优化」类反馈可沉淀为规则建议（管理员操作）
+async function loadConvertedIds() {
+  try {
+    const res = await ruleSuggestionApi.feedbackIds()
+    convertedIds.value = new Set(res.data || [])
+  } catch { /* 忽略，最多是按钮多显示 */ }
+}
+
+// 「误判申诉 / 规则优化」类反馈可沉淀为规则建议（管理员操作）；已转过的不再显示
 function canSuggest(row) {
-  return ['误判申诉', '规则优化'].includes(row.type) && currentRole().name === '管理员'
+  return ['误判申诉', '规则优化'].includes(row.type)
+    && currentRole().name === '管理员'
+    && !convertedIds.value.has(row.id)
 }
 
 async function toRuleSuggestion(row) {
@@ -377,6 +387,7 @@ async function toRuleSuggestion(row) {
       suggestedChange: ''
     })
     ElMessage.success(`已由 ${row.id} 生成规则优化建议，待确认`)
+    convertedIds.value = new Set([...convertedIds.value, row.id])  // 立即隐藏该行按钮
     if (suggestVisible.value) await loadSuggestions()
     else await loadSugStats()
   } catch { ElMessage.error('生成规则建议失败') }
@@ -412,6 +423,7 @@ function sugTagType(s) {
 onMounted(() => {
   loadStats()
   loadList()
+  loadConvertedIds()
 })
 </script>
 
