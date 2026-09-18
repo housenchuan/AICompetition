@@ -135,8 +135,7 @@ public class StatService {
             Map<String, Long> counts = new LinkedHashMap<>();
             for (Object row : rows) {
                 String k = f1.apply(row);
-                if (k == null || k.isEmpty()) continue;
-                counts.merge(k, 1L, Long::sum);
+                counts.merge((k == null || k.isEmpty()) ? "空" : k, 1L, Long::sum);
             }
             long total = counts.values().stream().mapToLong(Long::longValue).sum();
             List<Map<String, Object>> list = new ArrayList<>();
@@ -163,7 +162,8 @@ public class StatService {
             long total = 0;
             for (Object row : rows) {
                 String r = f1.apply(row), c = f2.apply(row);
-                if (r == null || r.isEmpty() || c == null || c.isEmpty()) continue;
+                r = (r == null || r.isEmpty()) ? "空" : r;
+                c = (c == null || c.isEmpty()) ? "空" : c;
                 pivot.computeIfAbsent(r, k -> new java.util.TreeMap<>()).merge(c, 1L, Long::sum);
                 colTotals.merge(c, 1L, Long::sum);
                 total++;
@@ -192,13 +192,10 @@ public class StatService {
             Map<List<String>, Long> combo = new LinkedHashMap<>();
             for (Object row : rows) {
                 List<String> key = new ArrayList<>(fns.size());
-                boolean skip = false;
                 for (Function<Object, String> fn : fns) {
                     String v = fn.apply(row);
-                    if (v == null || v.isEmpty()) { skip = true; break; }
-                    key.add(v);
+                    key.add((v == null || v.isEmpty()) ? "空" : v);
                 }
-                if (skip) continue;
                 combo.merge(key, 1L, Long::sum);
             }
             long total = combo.values().stream().mapToLong(Long::longValue).sum();
