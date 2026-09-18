@@ -20,10 +20,19 @@ public class UnderwritingDecisionController {
 
     private final UnderwritingDecisionService service;
     private final AdjustmentService adjustmentService;
+    private final com.aicompetition.service.ConfidenceService confidenceService;
 
-    public UnderwritingDecisionController(UnderwritingDecisionService service, AdjustmentService adjustmentService) {
+    public UnderwritingDecisionController(UnderwritingDecisionService service, AdjustmentService adjustmentService,
+                                          com.aicompetition.service.ConfidenceService confidenceService) {
         this.service = service;
         this.adjustmentService = adjustmentService;
+        this.confidenceService = confidenceService;
+    }
+
+    /** 创新点③：AI 置信度智能路由分布统计（自动通过/普通审核/高优人工 + 自动通过率）。 */
+    @PostMapping("/confidence-stats")
+    public Result<ObjectNode> confidenceStats() {
+        return Result.ok(confidenceService.priorityStats());
     }
 
     @PostMapping("/page")

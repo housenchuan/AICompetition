@@ -35,7 +35,9 @@ class PredictServiceTest {
         policyApplicationMapper = mock(PolicyApplicationMapper.class);
         AiService aiService = mock(AiService.class);
         AdjustmentService adjustmentService = mock(AdjustmentService.class);
-        service = new PredictService(engine, decisionMapper, policyApplicationMapper, ruleService, aiService, adjustmentService);
+        ConfidenceService confidenceService = mock(ConfidenceService.class);
+        when(confidenceService.evaluate(any(), any())).thenReturn(new ObjectMapper().createObjectNode());
+        service = new PredictService(engine, decisionMapper, policyApplicationMapper, ruleService, aiService, adjustmentService, confidenceService);
     }
 
     private UnderwritingDecision healthyDecision() {

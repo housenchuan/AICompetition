@@ -107,7 +107,7 @@
             size="small" clearable @keyup.enter="loadList(1)" @clear="loadList(1)" />
         </el-col>
         <el-col :span="3" style="text-align:right">
-          <el-button type="primary" size="small" @click="dialogVisible = true">+ 提交反馈</el-button>
+          <el-button size="small" @click="openSuggestions">规则建议闭环</el-button>
         </el-col>
       </el-row>
     </div>
@@ -146,9 +146,10 @@
             <span v-else class="no-star">—</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="64" fixed="right">
+        <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" size="small" @click="openHandle(row)">处理</el-button>
+            <el-button v-if="canSuggest(row)" link type="success" size="small" @click="toRuleSuggestion(row)">转规则建议</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -167,6 +168,43 @@
 
     <!-- 提交反馈弹框（页面内也有入口） -->
     <FeedbackDialog v-model="dialogVisible" @submitted="onSubmitted" />
+
+    <!-- 创新点⑤：反馈驱动的规则优化闭环 -->
+    <el-dialog v-model="suggestVisible" title="反馈驱动的规则优化闭环" width="760px">
+      <div class="sug-stats">
+        <span>建议总数 <b>{{ sugStats.total ?? 0 }}</b></span>
+        <span>待确认 <b class="c-warn">{{ sugStats['待确认'] ?? 0 }}</b></span>
+        <span>已采纳 <b class="c-ok">{{ sugStats['已采纳'] ?? 0 }}</b></span>
+        <span>已驳回 <b class="c-muted">{{ sugStats['已驳回'] ?? 0 }}</b></span>
+        <span>采纳率 <b class="c-ok">{{ sugStats.adoptRate ?? 0 }}%</b></span>
+      </div>
+      <el-table :data="suggestions" size="small" border max-height="380">
+        <el-table-column label="建议号" prop="id" width="76" />
+        <el-table-column label="来源反馈" prop="fromFeedbackId" width="88" />
+        <el-table-column label="来源类型" prop="sourceType" width="90" />
+        <el-table-column label="关联核保" prop="relatedNo" width="88">
+          <template #default="{ row }">{{ row.relatedNo || '—' }}</template>
+        </el-table-column>
+        <el-table-column label="建议内容" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.title }}<span v-if="row.suggestedChange"> · {{ row.suggestedChange }}</span></template>
+        </el-table-column>
+        <el-table-column label="状态" width="82">
+          <template #default="{ row }">
+            <el-tag :type="sugTagType(row.status)" size="small">{{ row.status }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row.status === '待确认'">
+              <el-button link type="success" size="small" @click="reviewSuggestion(row, true)">采纳</el-button>
+              <el-button link type="danger" size="small" @click="reviewSuggestion(row, false)">驳回</el-button>
+            </template>
+            <span v-else class="c-muted">{{ row.reviewer || '—' }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="sug-tip">说明：采纳为人工闸口确认，沉淀为规则优化项反哺规则知识库；规则自动改写（自学习）列入后期版本规划。</div>
+    </el-dialog>
 
     <!-- 处理工单弹框 -->
     <el-dialog v-model="handleVisible" title="处理工单" width="420px">
@@ -197,8 +235,9 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { feedbackApi } from '../api/index'
+import { feedbackApi, ruleSuggestionApi } from '../api/index'
 import FeedbackDialog from '../components/FeedbackDialog.vue'
+import { currentRole } from '../roles'
 
 const typeOptions = ['问题反馈', '功能建议', '误判申诉', '规则优化', '投诉', '表扬']
 const statusOptions = ['待处理', '处理中', '已解决', '已关闭', '已驳回']
@@ -320,6 +359,56 @@ function onSubmitted() {
   loadStats()
 }
 
+// ===== 创新点⑤：反馈驱动的规则优化闭环 =====
+const suggestVisible = ref(false)
+const suggestions = ref([])
+const sugStats = ref({})
+
+// 「误判申诉 / 规则优化」类反馈可沉淀为规则建议（管理员操作）
+function canSuggest(row) {
+  return ['误判申诉', '规则优化'].includes(row.type) && currentRole().name === '管理员'
+}
+
+async function toRuleSuggestion(row) {
+  try {
+    await ruleSuggestionApi.fromFeedback(row.id, {
+      title: row.title,
+      content: row.description || '',
+      suggestedChange: ''
+    })
+    ElMessage.success(`已由 ${row.id} 生成规则优化建议，待确认`)
+    if (suggestVisible.value) await loadSuggestions()
+    else await loadSugStats()
+  } catch { ElMessage.error('生成规则建议失败') }
+}
+
+async function openSuggestions() {
+  suggestVisible.value = true
+  await loadSuggestions()
+}
+
+async function loadSuggestions() {
+  const [listRes] = await Promise.all([ruleSuggestionApi.list({}), loadSugStats()])
+  suggestions.value = listRes.data || []
+}
+
+async function loadSugStats() {
+  const res = await ruleSuggestionApi.stats()
+  sugStats.value = res.data || {}
+}
+
+async function reviewSuggestion(row, adopt) {
+  try {
+    await ruleSuggestionApi.review(row.id, { adopt, reviewer: currentRole().name })
+    ElMessage.success(adopt ? '已采纳，将反哺规则知识库' : '已驳回')
+    await loadSuggestions()
+  } catch { ElMessage.error('操作失败') }
+}
+
+function sugTagType(s) {
+  return { '待确认': 'warning', '已采纳': 'success', '已驳回': 'info' }[s] || 'info'
+}
+
 onMounted(() => {
   loadStats()
   loadList()
@@ -372,4 +461,11 @@ onMounted(() => {
 
 .stars { color: #fa8c16; font-size: 13px; letter-spacing: 1px; }
 .no-star { color: #ccc; }
+
+.sug-stats { display: flex; gap: 22px; font-size: 13px; color: #555; margin-bottom: 12px; }
+.sug-stats b { font-size: 15px; color: #1f2329; margin-left: 2px; }
+.c-warn { color: #fa8c16 !important; }
+.c-ok { color: #52c41a !important; }
+.c-muted { color: #999 !important; }
+.sug-tip { font-size: 12px; color: #999; margin-top: 12px; line-height: 1.6; }
 </style>

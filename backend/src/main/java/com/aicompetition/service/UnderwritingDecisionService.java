@@ -17,10 +17,21 @@ public class UnderwritingDecisionService {
 
     private final UnderwritingDecisionMapper mapper;
     private final AdjustmentService adjustmentService;
+    private final ConfidenceService confidenceService;
 
-    public UnderwritingDecisionService(UnderwritingDecisionMapper mapper, AdjustmentService adjustmentService) {
+    public UnderwritingDecisionService(UnderwritingDecisionMapper mapper, AdjustmentService adjustmentService,
+                                       ConfidenceService confidenceService) {
         this.mapper = mapper;
         this.adjustmentService = adjustmentService;
+        this.confidenceService = confidenceService;
+    }
+
+    /** 合并文件存储的透传标签：人工修整状态 + AI 置信度/审核优先级。 */
+    private void mergeTags(UnderwritingDecision d) {
+        if (d == null || d.getDecisionId() == null) return;
+        d.setAdjustStatus(adjustmentService.latestStatusTag(d.getDecisionId()));
+        d.setConfidence(confidenceService.confidenceOf(d.getDecisionId()));
+        d.setReviewPriority(confidenceService.priorityTag(d.getDecisionId()));
     }
 
     public PageResult<UnderwritingDecision> page(UnderwritingDecisionQuery query) {
@@ -45,16 +56,16 @@ public class UnderwritingDecisionService {
         PageHelper.startPage(query.getPageNum(), query.getPageSize());
         List<UnderwritingDecision> list = mapper.selectList(q, createdFrom, createdTo, updatedFrom, updatedTo);
         PageResult<UnderwritingDecision> pr = PageResult.of(list);
-        // 合并人工修整状态标签（来自文件存储，非 DB 列）
+        // 合并文件存储标签（人工修整状态 + AI 置信度/审核优先级），非 DB 列
         for (UnderwritingDecision d : list) {
-            d.setAdjustStatus(adjustmentService.latestStatusTag(d.getDecisionId()));
+            mergeTags(d);
         }
         return pr;
     }
 
     public UnderwritingDecision getById(String decisionId) {
         UnderwritingDecision d = mapper.selectById(decisionId);
-        if (d != null) d.setAdjustStatus(adjustmentService.latestStatusTag(decisionId));
+        mergeTags(d);
         return d;
     }
 

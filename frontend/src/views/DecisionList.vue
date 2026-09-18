@@ -101,6 +101,15 @@
             <span v-else class="muted">待预测</span>
           </template>
         </el-table-column>
+        <el-table-column label="AI置信度" min-width="150">
+          <template #default="{ row }">
+            <template v-if="row.confidence != null">
+              <el-tag :type="confTagType(row.confidence)" size="small" effect="dark">{{ row.confidence }}</el-tag>
+              <el-tag :type="priorityTagType(row.reviewPriority)" size="small" style="margin-left:4px">{{ row.reviewPriority }}</el-tag>
+            </template>
+            <span v-else class="muted">待预测</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="createdBy" label="创建人" min-width="90" />
         <el-table-column prop="createdAt" label="创建时间" min-width="160" />
         <el-table-column prop="updatedAt" label="更新时间" min-width="160" />
@@ -178,7 +187,14 @@
               </el-descriptions-item>
               <el-descriptions-item label="核保结论">{{ detailDec.underwritingResult ?? '待预测' }}</el-descriptions-item>
               <el-descriptions-item label="加费比例">{{ detailDec.premiumAdjustment ?? '—' }}</el-descriptions-item>
-              <el-descriptions-item label="关键风险因子" :span="2">{{ detailDec.keyFactors ?? '待预测' }}</el-descriptions-item>
+              <el-descriptions-item label="AI 置信度">
+                <template v-if="detailDec.confidence != null">
+                  <el-tag :type="confTagType(detailDec.confidence)" size="small" effect="dark">{{ detailDec.confidence }} 分</el-tag>
+                  <el-tag :type="priorityTagType(detailDec.reviewPriority)" size="small" style="margin-left:6px">{{ detailDec.reviewPriority }}</el-tag>
+                </template>
+                <span v-else class="muted">待预测</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="关键风险因子">{{ detailDec.keyFactors ?? '待预测' }}</el-descriptions-item>
             </el-descriptions>
           </template>
         </template>
@@ -191,7 +207,7 @@
             <div v-if="pendingRecord" class="review-box">
               <div class="review-hd">
                 <span>本条修整待审批</span>
-                <el-tag size="small" type="warning">审批路径：核保主管（二级审批）</el-tag>
+                <el-tag size="small" type="warning">审批路径：{{ approvalPathText(pendingRecord) }}</el-tag>
               </div>
               <el-table :data="compareRows(pendingRecord)" border size="small" class="cmp-table">
                 <el-table-column prop="label" label="字段" width="110" />
@@ -214,10 +230,16 @@
             <!-- 时间线：AI 核保 → 人工提交 → 审批结果 -->
             <div class="timeline">
               <div class="tl-item">
-                <b>AI 自动核保 · 规则引擎</b>
+                <b>AI 自动核保 · 规则引擎 + LLM 双引擎</b>
+                <el-tag v-if="audit.confidence" :type="confTagType(audit.confidence.confidence)" size="small" effect="dark" style="margin-left:6px">置信度 {{ audit.confidence.confidence }}</el-tag>
+                <el-tag v-if="audit.confidence" :type="priorityTagType(audit.confidence.priority)" size="small" style="margin-left:4px">{{ audit.confidence.priority }}</el-tag>
                 <span class="tl-time">{{ detailDec.createdAt }}</span>
                 <div v-if="audit.aiBaseline" class="tl-body">
                   结论 {{ audit.aiBaseline.underwritingResult }} / {{ audit.aiBaseline.riskLevel }} / 加费{{ pct(audit.aiBaseline.premiumAdjustment) }} / 评分{{ audit.aiBaseline.riskScore }}
+                  <br />规则命中：{{ audit.aiBaseline.keyFactors || '无显著风险因素' }}
+                  <template v-if="audit.confidence && audit.confidence.signals && audit.confidence.signals.length">
+                    <br />置信度扣分：<span v-for="(s, si) in audit.confidence.signals" :key="si" class="conf-signal">{{ s.factor }}（{{ s.delta }}）</span>
+                  </template>
                 </div>
               </div>
               <div v-for="(rec, i) in (audit.records || [])" :key="i" class="tl-item">
@@ -266,7 +288,7 @@
             placeholder="必填：请说明人工修整依据（复核材料 / 规则例外 / 客户申诉等）" />
         </el-form-item>
       </el-form>
-      <div class="adjust-path">审批路径：核保主管（二级审批）· {{ isSupervisor ? '当前为核保主管，提交即生效' : '提交后进入待审批' }}</div>
+      <div class="adjust-path">审批路径：核保主管审批（按修整严重程度自动标注 普通→一级 / 重大→二级）· {{ isSupervisor ? '当前为核保主管，提交即生效' : '提交后进入待审批' }}</div>
       <template #footer>
         <el-button @click="adjustVisible = false">取消</el-button>
         <el-button type="primary" :loading="adjustSaving" @click="submitAdjust">
@@ -300,6 +322,7 @@ const role = computed(() => currentRole())
 const roleName = computed(() => role.value.name)
 const isSupervisor = computed(() => roleName.value === '核保主管')
 const canAdjust = computed(() => ['核保专员', '核保主管'].includes(roleName.value))
+// 分级审批：统一由核保主管审批（按严重程度标注一级/二级）
 const canReview = computed(() => roleName.value === '核保主管')
 
 // 覆写下拉选项（与规则 levels 的 result/level 一致）
@@ -307,6 +330,16 @@ const RESULT_OPTS = ['标保（标准费率承保）', '加费承保（加费10%
 const LEVEL_OPTS = ['标准体', '次标体A级', '次标体B级', '高风险体', '拒保体']
 
 function pct(coeff) { if (coeff == null) return '—'; return Math.round((Number(coeff) - 1) * 100) + '%' }
+// 创新点③：置信度分档配色 + 审核优先级配色
+function confTagType(c) { if (c == null) return 'info'; if (c >= 85) return 'success'; if (c >= 70) return 'warning'; return 'danger' }
+function priorityTagType(p) { return { '自动通过': 'success', '普通审核': 'warning', '高优人工': 'danger' }[p] || 'info' }
+// 创新点②：按记录严重程度显示分级审批路径（统一核保主管审批）
+function approvalPathText(rec) {
+  if (!rec) return '—'
+  const sev = rec.adjSeverity || (rec.level === 2 ? '重大修整' : '普通修整')
+  const approver = rec.approverRole || '核保主管'
+  return `${sev} · ${rec.level === 2 ? '二级' : '一级'}审批（${approver}）`
+}
 function adjustTagType(s) { return { '待审批': 'warning', '已生效': 'success', '已驳回': 'info' }[s] || 'info' }
 function statusTag(s) { if (s === '待审批') return '待审批'; if (s === '已通过' || s === '已生效') return '已生效'; if (s === '已驳回') return '已驳回'; return '' }
 
@@ -566,6 +599,7 @@ onMounted(load)
 .tl-item:last-child { border-left-color: transparent; }
 .tl-time { font-size: 11px; color: #a0a4ab; margin-left: 8px; }
 .tl-body { font-size: 12px; color: #4a4f57; margin-top: 4px; line-height: 1.6; }
+.conf-signal { display: inline-block; margin: 0 6px 2px 0; padding: 0 6px; background: #fef0f0; color: #f56c6c; border-radius: 4px; }
 .adjust-cur { font-size: 13px; color: #4a4f57; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .adjust-cur b { color: #1f2329; }
 .adjust-path { font-size: 12px; color: #8a8f99; margin-top: 4px; }

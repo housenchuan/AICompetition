@@ -31,7 +31,17 @@ export const decisionApi = {
   // 人工修整 / 分级审批 / 审计留痕
   adjust: (id, data) => request.post(`/api/decisions/adjust/${id}`, data),
   review: (id, data) => request.post(`/api/decisions/adjust/${id}/review`, data),
-  audit: (id) => request.post(`/api/decisions/adjust/${id}/audit`)
+  audit: (id) => request.post(`/api/decisions/adjust/${id}/audit`),
+  // 创新点③：AI 置信度智能路由分布统计
+  confidenceStats: () => request.post('/api/decisions/confidence-stats')
+}
+
+// 创新点⑤：反馈驱动的规则优化闭环
+export const ruleSuggestionApi = {
+  fromFeedback: (feedbackId, data) => request.post(`/api/rule-suggestions/from-feedback/${feedbackId}`, data || {}),
+  list: (data) => request.post('/api/rule-suggestions/list', data || {}),
+  review: (id, data) => request.post(`/api/rule-suggestions/${id}/review`, data),
+  stats: () => request.post('/api/rule-suggestions/stats')
 }
 
 // 风险计分规则 + 规则引擎

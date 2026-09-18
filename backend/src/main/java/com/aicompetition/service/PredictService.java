@@ -34,19 +34,22 @@ public class PredictService {
     private final RuleService ruleService;
     private final AiService aiService;
     private final AdjustmentService adjustmentService;
+    private final ConfidenceService confidenceService;
 
     @Value("${ai.predict.use-llm:true}")
     private boolean useLlm;
 
     public PredictService(RiskScoreEngine engine, UnderwritingDecisionMapper decisionMapper,
                           PolicyApplicationMapper policyApplicationMapper, RuleService ruleService,
-                          AiService aiService, AdjustmentService adjustmentService) {
+                          AiService aiService, AdjustmentService adjustmentService,
+                          ConfidenceService confidenceService) {
         this.engine = engine;
         this.decisionMapper = decisionMapper;
         this.policyApplicationMapper = policyApplicationMapper;
         this.ruleService = ruleService;
         this.aiService = aiService;
         this.adjustmentService = adjustmentService;
+        this.confidenceService = confidenceService;
     }
 
     /** 仅试算，不落库。 */
@@ -75,6 +78,14 @@ public class PredictService {
         UnderwritingDecision saved = decisionMapper.selectById(decisionId);
         // 备份本次 AI 预测结果（供审核对比、永久保留，不受后续人工覆写影响）
         adjustmentService.saveAiBaseline(saved);
+        // 创新点③：评估 AI 置信度并智能路由审核优先级（文件存储，供列表/审计展示）
+        try {
+            com.fasterxml.jackson.databind.node.ObjectNode conf = confidenceService.evaluate(saved, r);
+            saved.setConfidence(conf.path("confidence").asInt());
+            saved.setReviewPriority(conf.path("priority").asText(null));
+        } catch (Exception e) {
+            log.warn("置信度评估失败 decisionId={}: {}", decisionId, e.getMessage());
+        }
         return saved;
     }
 

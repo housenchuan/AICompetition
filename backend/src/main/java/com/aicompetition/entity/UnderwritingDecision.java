@@ -31,8 +31,20 @@ public class UnderwritingDecision {
     /** 非持久化：人工修整状态标签（待审批/已生效/已驳回），由 AdjustmentService 合并填充，不入库。 */
     private String adjustStatus;
 
+    /** 非持久化：AI 置信度评分（0-100），由 ConfidenceService 合并填充，不入库（文件存储）。 */
+    private Integer confidence;
+
+    /** 非持久化：智能路由审核优先级（自动通过/普通审核/高优人工），由 ConfidenceService 合并填充。 */
+    private String reviewPriority;
+
     public String getAdjustStatus() { return adjustStatus; }
     public void setAdjustStatus(String adjustStatus) { this.adjustStatus = adjustStatus; }
+
+    public Integer getConfidence() { return confidence; }
+    public void setConfidence(Integer confidence) { this.confidence = confidence; }
+
+    public String getReviewPriority() { return reviewPriority; }
+    public void setReviewPriority(String reviewPriority) { this.reviewPriority = reviewPriority; }
 
     public String getDecisionId() { return decisionId; }
     public void setDecisionId(String decisionId) { this.decisionId = decisionId; }

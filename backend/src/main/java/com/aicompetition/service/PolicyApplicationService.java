@@ -23,10 +23,13 @@ public class PolicyApplicationService {
 
     private final PolicyApplicationMapper mapper;
     private final UnderwritingDecisionMapper decisionMapper;
+    private final UnderwritingDecisionService decisionService;
 
-    public PolicyApplicationService(PolicyApplicationMapper mapper, UnderwritingDecisionMapper decisionMapper) {
+    public PolicyApplicationService(PolicyApplicationMapper mapper, UnderwritingDecisionMapper decisionMapper,
+                                    UnderwritingDecisionService decisionService) {
         this.mapper = mapper;
         this.decisionMapper = decisionMapper;
+        this.decisionService = decisionService;
     }
 
     public PageResult<PolicyApplication> page(PolicyApplicationQuery query) {
@@ -69,6 +72,10 @@ public class PolicyApplicationService {
     public Map<String, Object> getWithDecision(String profileId) {
         PolicyApplication application = mapper.selectById(profileId);
         UnderwritingDecision decision = decisionMapper.selectByApplicationId(profileId);
+        // 复用带合并的 getById，补齐透传字段（AI 置信度 / 审核优先级 / 人工修整状态）
+        if (decision != null && decision.getDecisionId() != null) {
+            decision = decisionService.getById(decision.getDecisionId());
+        }
         Map<String, Object> result = new HashMap<>();
         result.put("application", application);
         result.put("decision", decision);

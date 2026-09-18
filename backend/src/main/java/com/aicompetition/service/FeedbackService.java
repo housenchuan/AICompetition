@@ -105,6 +105,13 @@ public class FeedbackService implements InitializingBean {
         return result;
     }
 
+    public synchronized FeedbackItem get(String id) {
+        for (FeedbackItem item : items) {
+            if (item.getId().equals(id)) return item;
+        }
+        return null;
+    }
+
     public synchronized FeedbackItem create(FeedbackItem item) {
         item.setId("F" + idCounter.incrementAndGet());
         item.setStatus("待处理");

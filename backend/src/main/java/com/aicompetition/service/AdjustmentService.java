@@ -33,19 +33,27 @@ public class AdjustmentService {
 
     public static final String ROLE_UNDERWRITER = "核保专员";
     public static final String ROLE_SUPERVISOR = "核保主管";
+    public static final String ROLE_DIRECTOR = "核保总监";
+    public static final String ROLE_ADMIN = "管理员";
 
     public static final String ST_PENDING = "待审批";
     public static final String ST_APPROVED = "已通过";
     public static final String ST_EFFECTIVE = "已生效"; // 核保主管免审直接生效
     public static final String ST_REJECTED = "已驳回";
 
+    /** 风险等级排序（用于判断「升高风险」）。 */
+    private static final java.util.List<String> LEVEL_ORDER = java.util.Arrays.asList(
+            "标准体", "次标体A级", "次标体B级", "高风险体", "拒保体");
+
     private final ObjectMapper om = new ObjectMapper();
     private final File file = new File("data/adjustments.json");
     private final UnderwritingDecisionMapper decisionMapper;
+    private final ConfidenceService confidenceService;
     private ObjectNode root;
 
-    public AdjustmentService(UnderwritingDecisionMapper decisionMapper) {
+    public AdjustmentService(UnderwritingDecisionMapper decisionMapper, ConfidenceService confidenceService) {
         this.decisionMapper = decisionMapper;
+        this.confidenceService = confidenceService;
         load();
     }
 
@@ -121,6 +129,11 @@ public class AdjustmentService {
         boolean supervisor = ROLE_SUPERVISOR.equals(role);
         String now = LocalDateTime.now().format(TS);
 
+        // §4.6 严重程度判定 → 分级标注（统一由核保主管审批，重大修整标为二级需更严格复核）
+        boolean major = isMajorAdjustment(aiPrediction, humanValue);
+        int level = major ? 2 : 1;
+        String approverRole = ROLE_SUPERVISOR;
+
         ObjectNode rec = om.createObjectNode();
         rec.put("adjustId", UUID.randomUUID().toString().replace("-", ""));
         rec.put("decisionId", decisionId);
@@ -129,8 +142,9 @@ public class AdjustmentService {
         rec.put("reason", req.getReason().trim());
         rec.put("submitRole", role);
         rec.put("submitAt", now);
-        rec.put("level", 2);
-        rec.put("approverRole", ROLE_SUPERVISOR);
+        rec.put("level", level);
+        rec.put("adjSeverity", major ? "重大修整" : "普通修整");
+        rec.put("approverRole", approverRole);
         rec.put("status", supervisor ? ST_EFFECTIVE : ST_PENDING);
         rec.putNull("reviewRole");
         rec.putNull("reviewAt");
@@ -146,7 +160,8 @@ public class AdjustmentService {
 
     /** 审批：仅核保主管。通过→覆写生效；驳回→仅留痕。 */
     public synchronized ObjectNode review(String decisionId, ReviewRequest req) {
-        if (!ROLE_SUPERVISOR.equals(req.getRole())) {
+        String role = req.getRole();
+        if (!ROLE_SUPERVISOR.equals(role)) {
             throw new IllegalArgumentException("仅核保主管可审批");
         }
         ArrayNode list = listOf(decisionId);
@@ -191,13 +206,35 @@ public class AdjustmentService {
         return null;
     }
 
-    /** 审计留痕 + AI 备份（供详情弹窗）。 */
+    /** 审计留痕 + AI 备份 + AI 置信度（创新点④：可解释/可追溯，供详情弹窗）。 */
     public ObjectNode getAudit(String decisionId) {
         ObjectNode out = om.createObjectNode();
         out.set("aiBaseline", root.path("aiBaseline").path(decisionId).isMissingNode()
                 ? null : root.get("aiBaseline").get(decisionId));
         out.set("records", listOf(decisionId));
+        // 创新点④：附 AI 置信度评分与扣分信号（规则来源可解释）
+        JsonNode conf = confidenceService.get(decisionId);
+        out.set("confidence", conf);
         return out;
+    }
+
+    /**
+     * §4.6 重大修整判定（满足任一即为二级·核保总监审批）：
+     * ① 结论变更为拒保或延期；② 风险等级升至高风险体/拒保体；③ 加费系数变动 > 0.20（即加费比例变动>20%）。
+     */
+    private boolean isMajorAdjustment(JsonNode ai, ObjectNode human) {
+        String newResult = human.path("underwritingResult").asText("");
+        if (newResult.contains("拒保") || newResult.contains("延期")) return true;
+
+        String oldLevel = ai == null ? "" : ai.path("riskLevel").asText("");
+        String newLevel = human.path("riskLevel").asText("");
+        int oldRank = LEVEL_ORDER.indexOf(oldLevel);
+        int newRank = LEVEL_ORDER.indexOf(newLevel);
+        if (newRank >= LEVEL_ORDER.indexOf("高风险体") && newRank > oldRank) return true;
+
+        double oldPrem = ai == null ? 1.0 : ai.path("premiumAdjustment").asDouble(1.0);
+        double newPrem = human.path("premiumAdjustment").asDouble(1.0);
+        return Math.abs(newPrem - oldPrem) > 0.20;
     }
 
     private ArrayNode listOf(String decisionId) {
