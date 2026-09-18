@@ -65,7 +65,7 @@
   <text class="ts" x="340" y="458" text-anchor="middle">核保业务库 · 三张表</text>
   <rect class="box" x="446" y="416" width="176" height="58" rx="8"/>
   <text class="th" x="534" y="440" text-anchor="middle">爱码 LLM API</text>
-  <text class="ts" x="534" y="458" text-anchor="middle">aicoder-qwen3-30b</text>
+  <text class="ts" x="534" y="458" text-anchor="middle">aicoder-plus</text>
 
   <line class="arr" x1="180" y1="354" x2="300" y2="414"/>
   <text class="ts" x="188" y="374" text-anchor="middle">读写</text>

@@ -40,7 +40,7 @@
       "riskLevel" : "标准体",
       "underwritingResult" : "标保（标准费率承保）",
       "premiumAdjustment" : 1,
-      "keyFactors" : "无显著风险因素"
+      "keyFactors" : "关键风险因子：无显著风险"
     }
   },
   "adjustments" : {
