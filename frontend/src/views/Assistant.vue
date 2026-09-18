@@ -191,7 +191,7 @@ async function send() {
   if (!q) { ElMessage.warning('请输入指令'); return }
   messages.value.push({ role: 'user', text: q, time: now() })
   text.value = ''
-  const am = { role: 'assistant', loading: true, time: now() }
+  const am = reactive({ role: 'assistant', loading: true, time: now() })
   messages.value.push(am)
   scrollBottom()
   running.value = true
@@ -336,6 +336,7 @@ async function fillPredict(am, it) {
   // 多条：逐条顺序调 single，实时更新进度
   am.loading = false
   am.predicting = { current: 0, total: ids.length, currentId: ids[0], startTime: Date.now() }
+  await nextTick()  // 确保进度条先渲染出来再开始 loop
   scrollBottom()
 
   const results = [], failed = []
@@ -348,9 +349,14 @@ async function fillPredict(am, it) {
       failed.push(id)
     }
     am.predicting.current++
+    await nextTick()
     scrollBottom()
   }
 
+  // 全部完成后让进度条停留 800ms 再切换到结果表，避免闪过
+  am.predicting.current = ids.length
+  await nextTick()
+  await new Promise(r => setTimeout(r, 800))
   am.predicting = null
   const failNote = failed.length ? `（${failed.length} 条失败：${failed.slice(0, 3).join('、')}${failed.length > 3 ? '…' : ''}）` : ''
   am.table = { head: `预测结果 · 共 ${results.length} 条${failNote}`, rows: results, cols: COLS.underwriting_decisions }
