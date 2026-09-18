@@ -18,6 +18,17 @@
           <template v-if="m.role === 'user'">{{ m.text }}</template>
           <template v-else>
             <div v-if="m.loading" class="thinking">正在思考…</div>
+            <div v-else-if="m.predicting" class="predicting">
+              <div class="pred-label">
+                批量预测进行中
+                <span class="pred-id">{{ m.predicting.currentId }}</span>
+              </div>
+              <el-progress :percentage="m.predicting.total ? Math.round(m.predicting.current / m.predicting.total * 100) : 0" :stroke-width="8" />
+              <div class="pred-stat">
+                已完成 {{ m.predicting.current }} / {{ m.predicting.total }} 条
+                <span v-if="m.predicting.current > 0"> · 预计剩余约 {{ etaText(m.predicting) }}</span>
+              </div>
+            </div>
             <template v-else>
               <div v-if="m.error" class="err">{{ m.error }}</div>
               <template v-else>
@@ -315,8 +326,44 @@ async function fillPredict(am, it) {
   const listRes = await decisionApi.page(params)
   const ids = listRes.data.list.map(d => d.decisionId)
   if (!ids.length) { am.error = '未找到匹配的核保记录（该条件下暂无核保画像）。'; return }
-  const rows = (await predictApi.batch(ids)).data
-  am.table = { head: `预测结果 · 共 ${rows.length} 条`, rows, cols: COLS.underwriting_decisions }
+
+  if (ids.length <= 1) {
+    const rows = (await predictApi.batch(ids)).data
+    am.table = { head: `预测结果 · 共 ${rows.length} 条`, rows, cols: COLS.underwriting_decisions }
+    return
+  }
+
+  // 多条：逐条顺序调 single，实时更新进度
+  am.loading = false
+  am.predicting = { current: 0, total: ids.length, currentId: ids[0], startTime: Date.now() }
+  scrollBottom()
+
+  const results = [], failed = []
+  for (const id of ids) {
+    am.predicting.currentId = id
+    try {
+      const res = await predictApi.single(id)
+      results.push(res.data)
+    } catch {
+      failed.push(id)
+    }
+    am.predicting.current++
+    scrollBottom()
+  }
+
+  am.predicting = null
+  const failNote = failed.length ? `（${failed.length} 条失败：${failed.slice(0, 3).join('、')}${failed.length > 3 ? '…' : ''}）` : ''
+  am.table = { head: `预测结果 · 共 ${results.length} 条${failNote}`, rows: results, cols: COLS.underwriting_decisions }
+}
+
+function etaText(p) {
+  if (!p.current) return '计算中…'
+  const elapsed = Date.now() - p.startTime
+  const perItem = elapsed / p.current
+  const remaining = Math.round(perItem * (p.total - p.current) / 1000)
+  if (remaining < 60) return `${remaining} 秒`
+  const m = Math.floor(remaining / 60), s = remaining % 60
+  return s > 0 ? `${m} 分 ${s} 秒` : `${m} 分钟`
 }
 </script>
 
@@ -402,4 +449,9 @@ async function fillPredict(am, it) {
 :deep(.bar-fill) { height: 100%; border-radius: 7px; min-width: 2px; }
 :deep(.bar-val) { width: 26px; font-size: 12px; color: #1f2329; font-weight: 500; }
 :deep(.bars-empty) { color: #b7bcc4; font-size: 12px; }
+
+.predicting { min-width: 300px; }
+.pred-label { font-size: 14px; font-weight: 500; color: #1f2329; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pred-id { font-size: 12px; color: #8a8f99; font-weight: 400; }
+.pred-stat { margin-top: 8px; font-size: 12px; color: #8a8f99; }
 </style>
