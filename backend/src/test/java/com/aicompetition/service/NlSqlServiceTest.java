@@ -29,7 +29,7 @@ class NlSqlServiceTest {
                 "select pa.product_type, count(*) from policy_applications pa "
                         + "join underwriting_decisions ud on ud.application_id = pa.profile_id group by 1");
         assertTrue(sql.toLowerCase().startsWith("select"));
-        assertFalse(sql.contains("_nlq"), "已有 group by 无 limit 应包一层，但不应破坏语义");
+        assertTrue(sql.contains("_nlq"), "已有 group by 无 limit 应包一层，但不应破坏语义");
     }
 
     @Test
@@ -53,6 +53,14 @@ class NlSqlServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> NlSqlService.sanitize("UPDATE policy_applications SET status = '已通过'"));
         assertThrows(IllegalArgumentException.class, () -> NlSqlService.sanitize("DROP TABLE customer_risk_his"));
+    }
+
+    @Test
+    void SELECT_INTO_建表写入_拒绝() {
+        assertThrows(IllegalArgumentException.class, () ->
+                NlSqlService.sanitize("SELECT * INTO backup_t FROM customer_risk_his"));
+        assertThrows(IllegalArgumentException.class, () ->
+                NlSqlService.sanitize("select customer_id into new_table from policy_applications"));
     }
 
     @Test

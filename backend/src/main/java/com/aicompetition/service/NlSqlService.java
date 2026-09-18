@@ -33,9 +33,9 @@ public class NlSqlService {
     private static final Set<String> ALLOWED_TABLES = Set.of(
             "customer_risk_his", "policy_applications", "underwriting_decisions");
 
-    /** 禁止出现的关键字（写操作/DDL/危险语句）。 */
+    /** 禁止出现的关键字（写操作/DDL/危险语句）。into 可拦截 SELECT INTO 建表写入。 */
     private static final Pattern FORBIDDEN = Pattern.compile(
-            "(?i)\\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy|merge|call|do|set|vacuum|analyze|comment|reindex|listen|notify|lock)\\b");
+            "(?i)\\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|copy|merge|call|do|set|vacuum|analyze|comment|reindex|listen|notify|lock|into)\\b");
 
     /** 提取 FROM/JOIN 后的表名。 */
     private static final Pattern TABLE_REF = Pattern.compile(
