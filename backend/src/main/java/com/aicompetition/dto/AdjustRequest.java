@@ -12,12 +12,17 @@ public class AdjustRequest {
     private String underwritingResult;
     /** 加费系数，如加费60%记为 1.60；拒保/延期自动归零为 1.00。 */
     private BigDecimal premiumAdjustment;
+    /** 关键风险因子（AI 语义生成，人工可修整覆写；未改则保留原值）。 */
+    private String keyFactors;
     private String reason;
     /** 提交人角色：核保专员 / 核保主管。 */
     private String role;
 
     public Integer getRiskScore() { return riskScore; }
     public void setRiskScore(Integer riskScore) { this.riskScore = riskScore; }
+
+    public String getKeyFactors() { return keyFactors; }
+    public void setKeyFactors(String keyFactors) { this.keyFactors = keyFactors; }
 
     public String getRiskLevel() { return riskLevel; }
     public void setRiskLevel(String riskLevel) { this.riskLevel = riskLevel; }

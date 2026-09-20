@@ -125,6 +125,10 @@ public class AdjustmentService {
         humanValue.put("riskLevel", req.getRiskLevel());
         humanValue.put("underwritingResult", req.getUnderwritingResult());
         humanValue.put("premiumAdjustment", premium);
+        // 关键风险因子：人工可修整；未填则保留 AI 原值，避免覆写丢失
+        String keyFactors = req.getKeyFactors();
+        if (keyFactors == null || keyFactors.trim().isEmpty()) keyFactors = d.getKeyFactors();
+        humanValue.put("keyFactors", keyFactors);
 
         boolean supervisor = ROLE_SUPERVISOR.equals(role);
         String now = LocalDateTime.now().format(TS);
@@ -183,7 +187,7 @@ public class AdjustmentService {
         return pending;
     }
 
-    /** 覆写值写回决策表现有列（只更新4字段+updated_at，保留 key_factors）。 */
+    /** 覆写值写回决策表现有列（风险评分/等级/结论/加费 + 关键风险因子 + updated_at）。 */
     private void applyOverride(String decisionId, ObjectNode human) {
         UnderwritingDecision u = new UnderwritingDecision();
         u.setDecisionId(decisionId);
@@ -191,6 +195,7 @@ public class AdjustmentService {
         if (human.hasNonNull("riskLevel")) u.setRiskLevel(human.get("riskLevel").asText());
         if (human.hasNonNull("underwritingResult")) u.setUnderwritingResult(human.get("underwritingResult").asText());
         if (human.hasNonNull("premiumAdjustment")) u.setPremiumAdjustment(human.get("premiumAdjustment").decimalValue());
+        if (human.hasNonNull("keyFactors")) u.setKeyFactors(human.get("keyFactors").asText());
         u.setUpdatedAt(LocalDateTime.now());
         decisionMapper.updateById(u);
     }

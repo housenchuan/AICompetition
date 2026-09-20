@@ -101,12 +101,9 @@
             <span v-else class="muted">待预测</span>
           </template>
         </el-table-column>
-        <el-table-column label="AI置信度" min-width="150">
+        <el-table-column label="AI置信度" min-width="100">
           <template #default="{ row }">
-            <template v-if="row.confidence != null">
-              <el-tag :type="confTagType(row.confidence)" size="small" effect="dark">{{ row.confidence }}</el-tag>
-              <el-tag :type="priorityTagType(row.reviewPriority)" size="small" style="margin-left:4px">{{ row.reviewPriority }}</el-tag>
-            </template>
+            <el-tag v-if="row.confidence != null" :type="confTagType(row.confidence)" size="small" effect="dark">{{ row.confidence }}</el-tag>
             <span v-else class="muted">待预测</span>
           </template>
         </el-table-column>
@@ -188,10 +185,7 @@
               <el-descriptions-item label="核保结论">{{ detailDec.underwritingResult ?? '待预测' }}</el-descriptions-item>
               <el-descriptions-item label="加费比例">{{ detailDec.premiumAdjustment ?? '—' }}</el-descriptions-item>
               <el-descriptions-item label="AI 置信度">
-                <template v-if="detailDec.confidence != null">
-                  <el-tag :type="confTagType(detailDec.confidence)" size="small" effect="dark">{{ detailDec.confidence }} 分</el-tag>
-                  <el-tag :type="priorityTagType(detailDec.reviewPriority)" size="small" style="margin-left:6px">{{ detailDec.reviewPriority }}</el-tag>
-                </template>
+                <el-tag v-if="detailDec.confidence != null" :type="confTagType(detailDec.confidence)" size="small" effect="dark">{{ detailDec.confidence }} 分</el-tag>
                 <span v-else class="muted">待预测</span>
               </el-descriptions-item>
               <el-descriptions-item label="关键风险因子">{{ detailDec.keyFactors ?? '待预测' }}</el-descriptions-item>
@@ -232,7 +226,6 @@
               <div class="tl-item">
                 <b>AI 自动核保 · 规则引擎 + LLM 双引擎</b>
                 <el-tag v-if="audit.confidence" :type="confTagType(audit.confidence.confidence)" size="small" effect="dark" style="margin-left:6px">置信度 {{ audit.confidence.confidence }}</el-tag>
-                <el-tag v-if="audit.confidence" :type="priorityTagType(audit.confidence.priority)" size="small" style="margin-left:4px">{{ audit.confidence.priority }}</el-tag>
                 <span class="tl-time">{{ detailDec.createdAt }}</span>
                 <div v-if="audit.aiBaseline" class="tl-body">
                   结论 {{ audit.aiBaseline.underwritingResult }} / {{ audit.aiBaseline.riskLevel }} / 加费{{ pct(audit.aiBaseline.premiumAdjustment) }} / 评分{{ audit.aiBaseline.riskScore }}
@@ -283,6 +276,10 @@
         <el-form-item label="风险评分">
           <el-input-number v-model="adjustForm.riskScore" :min="0" :max="999" controls-position="right" style="width:180px" />
         </el-form-item>
+        <el-form-item label="关键风险因子">
+          <el-input v-model="adjustForm.keyFactors" type="textarea" :rows="3"
+            placeholder="AI 语义生成的关键风险因子，可在此人工修整；留空则保留原值" />
+        </el-form-item>
         <el-form-item label="修整原因" required>
           <el-input v-model="adjustForm.reason" type="textarea" :rows="3"
             placeholder="必填：请说明人工修整依据（复核材料 / 规则例外 / 客户申诉等）" />
@@ -330,9 +327,8 @@ const RESULT_OPTS = ['标保（标准费率承保）', '加费承保（加费10%
 const LEVEL_OPTS = ['标准体', '次标体A级', '次标体B级', '高风险体', '拒保体']
 
 function pct(coeff) { if (coeff == null) return '—'; return Math.round((Number(coeff) - 1) * 100) + '%' }
-// 创新点③：置信度分档配色 + 审核优先级配色
+// 置信度分档配色（仅展示得分，不再展示审核优先级路由）
 function confTagType(c) { if (c == null) return 'info'; if (c >= 85) return 'success'; if (c >= 70) return 'warning'; return 'danger' }
-function priorityTagType(p) { return { '自动通过': 'success', '普通审核': 'warning', '高优人工': 'danger' }[p] || 'info' }
 // 创新点②：按记录严重程度显示分级审批路径（统一核保主管审批）
 function approvalPathText(rec) {
   if (!rec) return '—'
@@ -505,7 +501,7 @@ async function doPredictBatch() {
 const adjustVisible = ref(false)
 const adjustRow = ref(null)
 const adjustSaving = ref(false)
-const adjustForm = reactive({ underwritingResult: '', riskLevel: '', premiumPct: 0, riskScore: 0, reason: '' })
+const adjustForm = reactive({ underwritingResult: '', riskLevel: '', premiumPct: 0, riskScore: 0, keyFactors: '', reason: '' })
 const zeroPremium = computed(() => /拒保|延期/.test(adjustForm.underwritingResult))
 
 function onResultChange() { if (zeroPremium.value) adjustForm.premiumPct = 0 }
@@ -516,6 +512,7 @@ function openAdjust(row) {
   adjustForm.riskLevel = row.riskLevel || ''
   adjustForm.premiumPct = row.premiumAdjustment != null ? Math.round((Number(row.premiumAdjustment) - 1) * 100) : 0
   adjustForm.riskScore = row.riskScore ?? 0
+  adjustForm.keyFactors = row.keyFactors || ''
   adjustForm.reason = ''
   adjustVisible.value = true
 }
@@ -530,6 +527,7 @@ async function submitAdjust() {
       riskLevel: adjustForm.riskLevel,
       premiumAdjustment,
       riskScore: adjustForm.riskScore,
+      keyFactors: adjustForm.keyFactors,
       reason: adjustForm.reason.trim(),
       role: roleName.value
     })
@@ -553,7 +551,8 @@ function compareRows(rec) {
     { label: '核保结论', ai: ai.underwritingResult, human: h.underwritingResult, changed: ai.underwritingResult !== h.underwritingResult },
     { label: '风险等级', ai: ai.riskLevel, human: h.riskLevel, changed: ai.riskLevel !== h.riskLevel },
     { label: '加费比例', ai: pct(ai.premiumAdjustment), human: pct(h.premiumAdjustment), changed: Number(ai.premiumAdjustment) !== Number(h.premiumAdjustment) },
-    { label: '风险评分', ai: ai.riskScore, human: h.riskScore, changed: ai.riskScore !== h.riskScore }
+    { label: '风险评分', ai: ai.riskScore, human: h.riskScore, changed: ai.riskScore !== h.riskScore },
+    { label: '关键风险因子', ai: ai.keyFactors || '—', human: h.keyFactors || '—', changed: (ai.keyFactors || '') !== (h.keyFactors || '') }
   ]
 }
 function recSummary(rec) {
