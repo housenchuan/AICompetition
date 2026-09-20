@@ -70,7 +70,7 @@
       </div>
 
       <div class="page-card mb">
-        <div class="sec-title">⑥ 职业风险评分 <el-tag size="small" type="info">{{ rules.occupationNote }}</el-tag></div>
+        <div class="sec-title">⑥ 职业风险评分</div>
         <el-table :data="rules.occupation" border size="small">
           <el-table-column prop="level" label="职业风险等级" width="130" />
           <el-table-column label="典型职业"><template #default="{ row }">{{ row.occupations.join('、') }}</template></el-table-column>
@@ -79,7 +79,7 @@
       </div>
 
       <div class="page-card mb">
-        <div class="sec-title">⑦ 家族病史评分 <el-tag size="small" type="info">{{ rules.familyHistoryNote }}</el-tag></div>
+        <div class="sec-title">⑦ 家族病史评分</div>
         <el-table :data="rules.familyHistory" border size="small">
           <el-table-column prop="level" label="家族病史类别" width="130" />
           <el-table-column label="具体病史"><template #default="{ row }">{{ row.diseasesText || (row.diseases.length ? row.diseases.join('、') : '（待历史数据挖掘填充）') }}</template></el-table-column>
@@ -88,7 +88,7 @@
       </div>
 
       <div class="page-card mb">
-        <div class="sec-title">⑧ 风险等级分类标准 <el-tag size="small" type="info">{{ rules.levelsNote }}</el-tag></div>
+        <div class="sec-title">⑧ 风险等级分类标准</div>
         <div class="sec-sub">核保风险总分 = 各维度风险加分之和。根据总分确定最终风险等级与核保结论如下表：</div>
         <el-table :data="rules.levels" border size="small">
           <el-table-column label="风险总分范围（需要划分分数范围）" width="240"><template #default="{ row }">{{ scoreRange(row) }}</template></el-table-column>
