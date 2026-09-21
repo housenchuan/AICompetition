@@ -75,4 +75,89 @@ class RiskScoreEngineTest {
         assertFalse(r.isRejected());
         assertNotEquals("拒保体", r.getRiskLevel());
     }
+
+    @Test
+    void BMI图片边界值_严格按规则表计分() {
+        assertBmiScore("18.4", 10);
+        assertBmiScore("18.5", 0);
+        assertBmiScore("24.9", 0);
+        assertBmiScore("25.0", 5);
+        assertBmiScore("28.0", 5);
+        assertBmiScore("28.1", 15);
+        assertBmiScore("31.9", 15);
+        assertBmiScore("32.0", 30);
+    }
+
+    @Test
+    void BMI两位小数_直接按原值判断不四舍五入() {
+        assertBmiScore("18.45", 10);
+        assertBmiScore("24.89", 0);
+        assertBmiScore("25.01", 5);
+        assertBmiScore("28.09", 0);
+        assertBmiScore("28.11", 15);
+        assertBmiScore("31.95", 15);
+    }
+
+    @Test
+    void 个人病史命中多个规则项_只取最高分() {
+        UnderwritingDecision d = base();
+        d.setPersonalMedicalHistory("胃炎、颈椎病、高血压");
+
+        ScoreResult r = engine.compute(d);
+
+        assertEquals(25, r.getTotalScore());
+        assertEquals(25, r.getBreakdown().get("个人病史"));
+        assertEquals(1, r.getKeyFactors().stream().filter(f -> f.startsWith("个人病史·")).count());
+    }
+
+    @Test
+    void 个人病史同一规则项命中多个疾病_只计一次() {
+        UnderwritingDecision d = base();
+        d.setPersonalMedicalHistory("胃炎、胆结石、甲状腺结节");
+
+        ScoreResult r = engine.compute(d);
+
+        assertEquals(10, r.getTotalScore());
+        assertEquals(10, r.getBreakdown().get("个人病史"));
+    }
+
+    @Test
+    void 个人病史命中直接拒保疾病_优先拒保不参与最高分比较() {
+        UnderwritingDecision d = base();
+        d.setPersonalMedicalHistory("高血压、恶性肿瘤");
+
+        ScoreResult r = engine.compute(d);
+
+        assertTrue(r.isRejected());
+        assertEquals(0, r.getTotalScore());
+        assertEquals("拒保体", r.getRiskLevel());
+    }
+
+    @Test
+    void 家族病史命中多个规则项_只取最高分() {
+        UnderwritingDecision d = base();
+        d.setFamilyMedicalHistory("高血压、恶性肿瘤");
+
+        ScoreResult r = engine.compute(d);
+
+        assertEquals(15, r.getTotalScore());
+        assertEquals(15, r.getBreakdown().get("家族病史(高风险)"));
+    }
+
+    @Test
+    void 家族病史同一规则项命中多个疾病_只计一次() {
+        UnderwritingDecision d = base();
+        d.setFamilyMedicalHistory("高血压、糖尿病、心脏病");
+
+        ScoreResult r = engine.compute(d);
+
+        assertEquals(5, r.getTotalScore());
+        assertEquals(5, r.getBreakdown().get("家族病史(中风险)"));
+    }
+
+    private void assertBmiScore(String bmi, int expectedScore) {
+        UnderwritingDecision d = base();
+        d.setBmi(new BigDecimal(bmi));
+        assertEquals(expectedScore, engine.compute(d).getTotalScore(), "BMI=" + bmi);
+    }
 }

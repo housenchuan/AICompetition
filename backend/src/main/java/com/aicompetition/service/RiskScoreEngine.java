@@ -97,16 +97,24 @@ public class RiskScoreEngine {
 
     private int scoreBmi(BigDecimal bmi, ScoreResult r) {
         if (bmi == null) return 0;
-        double v = bmi.doubleValue();
+        // 直接按数据库保存的 BMI 原值（最多两位小数）进行区间判断，不做四舍五入。
+        // 边界重叠（18.5、32.0）时取 min 更大的档位，
+        // 即 18.5 归正常范围、32.0 归严重肥胖。
+        BigDecimal v = bmi;
+        JsonNode matched = null;
         for (JsonNode n : ruleService.section("bmi")) {
-            if (v >= n.get("min").asDouble() && v < n.get("max").asDouble()) {
-                int s = n.get("score").asInt();
-                r.addBreakdown("BMI(" + n.get("label").asText() + ")", s);
-                if (s > 0) r.addFactor("BMI" + n.get("label").asText());
-                return s;
+            BigDecimal min = n.get("min").decimalValue();
+            BigDecimal max = n.get("max").decimalValue();
+            if (v.compareTo(min) >= 0 && v.compareTo(max) <= 0
+                    && (matched == null || min.compareTo(matched.get("min").decimalValue()) > 0)) {
+                matched = n;
             }
         }
-        return 0;
+        if (matched == null) return 0;
+        int s = matched.get("score").asInt();
+        r.addBreakdown("BMI(" + matched.get("label").asText() + ")", s);
+        if (s > 0) r.addFactor("BMI" + matched.get("label").asText());
+        return s;
     }
 
     private int scoreBloodPressure(String bp, ScoreResult r) {
@@ -153,17 +161,22 @@ public class RiskScoreEngine {
 
     private int scorePersonalHistory(String personal, ScoreResult r) {
         if (personal.isEmpty()) return 0;
-        int total = 0;
+        // 个人病史命中多个规则项时，仅取最高风险分；同一规则项包含多个疾病关键词，
+        // containsAny 只返回一次命中，因此不会在规则项内重复计分。
+        JsonNode matched = null;
         for (JsonNode rule : ruleService.section("personalHistory")) {
             if (rule.path("reject").asBoolean(false)) continue;
             if (containsAny(personal, rule.get("diseases"))) {
-                int s = rule.get("score").asInt();
-                total += s;
-                r.addFactor("个人病史·" + rule.get("category").asText() + "(+" + s + ")");
+                if (matched == null || rule.get("score").asInt() > matched.get("score").asInt()) {
+                    matched = rule;
+                }
             }
         }
-        if (total > 0) r.addBreakdown("个人病史", total);
-        return total;
+        if (matched == null) return 0;
+        int score = matched.get("score").asInt();
+        r.addBreakdown("个人病史", score);
+        r.addFactor("个人病史·" + matched.get("category").asText() + "(+" + score + ")");
+        return score;
     }
 
     private int scoreOccupation(String occupation, ScoreResult r) {
@@ -183,15 +196,20 @@ public class RiskScoreEngine {
 
     private int scoreFamilyHistory(String family, ScoreResult r) {
         if (family.isEmpty()) return 0;
+        // 家族病史命中多个规则项时，只取最高风险分；同一规则项内多个疾病关键词只算一次。
+        JsonNode matched = null;
         for (JsonNode n : ruleService.section("familyHistory")) {
             if (containsAny(family, n.get("diseases"))) {
-                int s = n.get("score").asInt();
-                r.addBreakdown("家族病史(" + n.get("level").asText() + ")", s);
-                if (s > 0) r.addFactor("家族病史" + n.get("level").asText());
-                return s;
+                if (matched == null || n.get("score").asInt() > matched.get("score").asInt()) {
+                    matched = n;
+                }
             }
         }
-        return 0;
+        if (matched == null) return 0;
+        int score = matched.get("score").asInt();
+        r.addBreakdown("家族病史(" + matched.get("level").asText() + ")", score);
+        if (score > 0) r.addFactor("家族病史" + matched.get("level").asText());
+        return score;
     }
 
     private void classify(int total, ScoreResult r) {

@@ -2,11 +2,11 @@
   "version": "V1",
   "versionNote": "BMI/血压/烟酒/个人病史/年龄 为赛题给定固定规则；职业风险、家族病史、风险等级区间为 V2 待历史理赔数据挖掘校准的部分（当前为暂定占位）。",
   "bmi": [
-    { "min": 0,    "max": 18.5,  "label": "体重过轻", "range": "< 18.5",      "score": 10 },
-    { "min": 18.5, "max": 25.0,  "label": "正常范围", "range": "18.5 ~ 24.9", "score": 0 },
-    { "min": 25.0, "max": 28.1,  "label": "超重",     "range": "25.0 ~ 28.0", "score": 5 },
-    { "min": 28.1, "max": 32.0,  "label": "肥胖",     "range": "28.1 ~ 32.0", "score": 15 },
-    { "min": 32.0, "max": 999,   "label": "严重肥胖", "range": "≥ 32.0",      "score": 30 }
+    { "min": 0,    "max": 18.5, "label": "体重过轻", "range": "BMI < 18.5",               "score": 10 },
+    { "min": 18.5, "max": 24.9, "label": "正常范围", "range": "18.5 ≤ BMI ≤ 24.9",        "score": 0 },
+    { "min": 25.0, "max": 28.0, "label": "超重",     "range": "25.0 ≤ BMI ≤ 28.0",        "score": 5 },
+    { "min": 28.1, "max": 32.0, "label": "肥胖",     "range": "28.1 ≤ BMI < 32.0",         "score": 15 },
+    { "min": 32.0, "max": 999,  "label": "严重肥胖", "range": "BMI ≥ 32.0",               "score": 30 }
   ],
   "bloodPressureNote": "血压按 5 个分类标签直接匹配计分（赛题给定固定规则）。",
   "bloodPressure": [
