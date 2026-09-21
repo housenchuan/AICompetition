@@ -46,13 +46,13 @@
     { "level": "中风险", "score": 5,  "occupations": ["服务员", "销售", "律师", "退休人员", "个体户", "工程师", "企业主", "IT从业者", "个体公商户", "外卖员", "快递员"] },
     { "level": "高风险", "score": 15, "occupations": ["建筑工人", "司机", "自由职业者", "装修工人", "网约车司机", "货车司机"] }
   ],
-  "occupationNote": "V1 分类，需按历史理赔数据重新划分并给出各等级职业清单（对应评分点 2.1.1）。",
+  "occupationNote": "",
   "familyHistory": [
     { "level": "低风险", "score": 0,  "diseasesText": "直系亲属无重大疾病史", "diseases": [] },
     { "level": "中风险", "score": 5,  "diseasesText": "直系亲属患高血压、糖尿病、脑血管疾病、心脏病", "diseases": ["高血压", "糖尿病", "脑血管疾病", "心脏病"] },
     { "level": "高风险", "score": 15, "diseasesText": "直系亲属患恶性肿瘤（癌症）", "diseases": ["恶性肿瘤", "癌症"] }
   ],
-  "familyHistoryNote": "家族病史类型划分待历史数据挖掘填充（对应评分点 2.1.2）。",
+  "familyHistoryNote": "",
   "levels": [
     { "level": "标准体",     "result": "标保（标准费率承保）",              "note": "健康风险低，按标准费率正常承保。从给出的样本数据层面上，理赔概率低于47.5%",           "scoreRangeText": "0 ~ 45",                 "minScore": 0,   "maxScore": 45,  "claimProb": "< 47.5%",        "premiumAdjustment": 1.0 },
     { "level": "次标体A级",  "result": "加费承保（加费10%~20%）",            "note": "存在轻度风险因素，加费后承保。从给出的样本数据层面上，理赔概率介于[47.5%,67.5%)",       "scoreRangeText": "50 ~ 65",                "minScore": 50,  "maxScore": 65,  "claimProb": "[47.5%, 67.5%)", "premiumAdjustment": 1.15 },
@@ -61,7 +61,7 @@
     { "level": "拒保体",     "result": "拒保",                            "note": "风险过高或存在明确拒保疾病，不予承保",                                             "scoreRangeText": "≥ 100 分，或存在直接拒保疾病", "minScore": 100, "maxScore": 999, "claimProb": "-",              "premiumAdjustment": 1.0 }
   ],
   "levelsFootnote": "注：存在以下情况之一的，直接判定为\"拒保体\"，不累计计分：恶性肿瘤（癌症）病史、严重器官疾病（心衰、肾衰、肝硬化）、严重精神疾病、AIDS/HIV感染、药物/酒精成瘾、近6个月内曾有拒保记录。（分级需要根据样本数据的标准进行；该样本数据进行过抽样重组，理赔比例非实际生产运转比例，仅供比赛使用，且实际核保结论会有保额调整或除外，也做简化处理）",
-  "levelsNote": "分数区间为 V1 暂定值，需结合历史理赔概率分位（47.5% / 67.5% / 82.5%）用样本数据校准（对应评分点 2.1.3）。",
+  "levelsNote": "",
   "drinkingRejectNote": "饮酒状况字段含「瘾」字（如「酒精成瘾」）即判酒精成瘾，直接拒保。受控词表正常值为 是/否/偶尔，不含「瘾」，无误判风险。",
   "drinkingReject": { "keyword": "瘾", "reject": true, "factor": "酒精成瘾（直接拒保）" },
   "recentRejectionNote": "同一投保人在当前申请日前 months 个月内存在 status='已拒保' 的其它申请（排除当前申请）时，直接拒保。",
