@@ -49,7 +49,7 @@
     <div class="page-card">
       <div class="toolbar">
         <el-button type="primary" @click="openCreate">新增</el-button>
-        <span class="tip">投保申请记录列表；新增/编辑为「先投保申请→再核保决策画像」两段填写；点「详情」查看该申请及其关联核保决策结果；预测在「核保决策结果」页发起。</span>
+        <span class="tip">投保申请记录列表；新增/编辑为「先投保申请→再核保决策信息」两段填写；点「详情」查看该申请及其关联核保决策结果；预测在「核保决策结果」页发起。</span>
       </div>
       <el-table ref="tableRef" :data="rows" v-loading="loading" border stripe size="small"
         max-height="calc(100vh - 330px)" scrollbar-always-on @filter-change="onFilter">
@@ -145,12 +145,12 @@
       </template>
     </el-dialog>
 
-    <!-- 新增 / 编辑：两步向导（① 投保申请信息 → ② 核保决策画像） -->
+    <!-- 新增 / 编辑：两步向导（① 投保申请信息 → ② 核保决策信息） -->
     <el-dialog v-model="formVisible" :title="editing ? '编辑投保核保记录' : '新增投保核保记录'" width="860px" top="6vh"
       class="edit-dialog" @open="step = 1">
       <el-steps :active="step - 1" finish-status="success" align-center class="dlg-steps">
         <el-step title="投保申请信息" />
-        <el-step title="核保决策画像" />
+        <el-step title="核保决策信息" />
       </el-steps>
       <div class="dlg-body">
         <div class="form-sec" v-show="step === 1">
@@ -185,7 +185,7 @@
         </div>
 
         <div class="form-sec" v-show="step === 2">
-          <div class="sec-hd"><span class="sec-no">2</span>核保决策画像<span class="sec-note">（AI 字段：风险评分/等级/结论/加费/关键因子 在「预测」时生成，此处只填画像）</span></div>
+          <div class="sec-hd"><span class="sec-no">2</span>核保决策信息<span class="sec-note">（AI 字段：风险评分/等级/结论/加费/关键因子在「预测」时生成，此处填写核保基础信息）</span></div>
           <el-form :model="decForm" label-width="92px">
             <el-row :gutter="16">
               <el-col :span="12"><el-form-item label="年龄"><el-input-number v-model="decForm.age" :min="0" :max="120" :controls="false" style="width:100%" /></el-form-item></el-col>
