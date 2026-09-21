@@ -48,9 +48,9 @@
           <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="年龄">
               <div class="range-input">
-                <el-input-number v-model="ageMin" :controls="false" placeholder="最小" style="width: 100%" />
+                <el-input-number v-model="ageMin" :controls="false" :precision="0" :step="1" placeholder="最小" style="width: 100%" />
                 <span class="range-sep">~</span>
-                <el-input-number v-model="ageMax" :controls="false" placeholder="最大" style="width: 100%" />
+                <el-input-number v-model="ageMax" :controls="false" :precision="0" :step="1" placeholder="最大" style="width: 100%" />
               </div>
             </el-form-item>
           </el-col>
@@ -66,9 +66,9 @@
           <el-col :xs="24" :sm="12" :md="8" :xl="6">
             <el-form-item label="BMI">
               <div class="range-input">
-                <el-input-number v-model="bmiMin" :controls="false" :precision="1" placeholder="最小" style="width: 100%" />
+                <el-input-number v-model="bmiMin" :controls="false" :precision="2" placeholder="最小" style="width: 100%" />
                 <span class="range-sep">~</span>
-                <el-input-number v-model="bmiMax" :controls="false" :precision="1" placeholder="最大" style="width: 100%" />
+                <el-input-number v-model="bmiMax" :controls="false" :precision="2" placeholder="最大" style="width: 100%" />
               </div>
             </el-form-item>
           </el-col>
